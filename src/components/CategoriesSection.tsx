@@ -1,21 +1,45 @@
-import { useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { categories } from '@/data/products';
 import { CategoryCard } from './CategoryCard';
 import { Button } from '@/components/ui/button';
 
 export const CategoriesSection = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'start',
+    loop: false,
+    skipSnaps: false,
+    dragFree: true,
+  });
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = 340;
-      scrollRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(true);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi, onSelect]);
 
   return (
     <section className="py-16 md:py-24 bg-secondary/30">
@@ -36,36 +60,37 @@ export const CategoriesSection = () => {
             <Button
               variant="outline"
               size="icon"
-              className="rounded-full"
-              onClick={() => scroll('left')}
+              className="rounded-full transition-opacity"
+              onClick={scrollPrev}
+              disabled={!canScrollPrev}
             >
               <ChevronLeft className="w-5 h-5" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              className="rounded-full"
-              onClick={() => scroll('right')}
+              className="rounded-full transition-opacity"
+              onClick={scrollNext}
+              disabled={!canScrollNext}
             >
               <ChevronRight className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
-        {/* Horizontal Slider */}
-        <div 
-          ref={scrollRef}
-          className="flex gap-6 overflow-x-auto pb-4 scroll-snap-x scrollbar-hide -mx-4 px-4"
-        >
-          {categories.map((category, index) => (
-            <div
-              key={category.id}
-              className="flex-shrink-0 animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <CategoryCard category={category} />
-            </div>
-          ))}
+        {/* Embla Carousel */}
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-4">
+            {categories.map((category, index) => (
+              <div
+                key={category.id}
+                className="flex-[0_0_calc(85%-8px)] sm:flex-[0_0_calc(50%-8px)] lg:flex-[0_0_calc(33.333%-11px)] min-w-0 animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <CategoryCard category={category} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
