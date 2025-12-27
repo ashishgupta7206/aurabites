@@ -6,59 +6,60 @@
 
 @layer base {
   :root {
-    /* Cream & warm backgrounds */
-    --background: 40 30% 97%;
+    /* Cream & warm backgrounds from packaging */
+    --background: 42 45% 95%;
     --foreground: 25 30% 15%;
 
     /* Card surfaces */
-    --card: 40 40% 99%;
+    --card: 42 50% 98%;
     --card-foreground: 25 30% 15%;
 
-    --popover: 40 40% 99%;
+    --popover: 42 50% 98%;
     --popover-foreground: 25 30% 15%;
 
-    /* Primary - Warm rust/tandoori */
-    --primary: 15 70% 45%;
-    --primary-foreground: 40 30% 98%;
+    /* Primary - Tandoori brown from packaging */
+    --primary: 15 55% 35%;
+    --primary-foreground: 42 45% 98%;
 
     /* Secondary - Soft cream */
-    --secondary: 40 35% 92%;
+    --secondary: 42 40% 90%;
     --secondary-foreground: 25 30% 20%;
 
     /* Muted tones */
-    --muted: 40 25% 90%;
+    --muted: 42 30% 88%;
     --muted-foreground: 25 15% 45%;
 
-    /* Accent - Mint green */
-    --accent: 160 45% 45%;
-    --accent-foreground: 160 45% 98%;
+    /* Accent - Mint green from Pudina packaging */
+    --accent: 95 45% 45%;
+    --accent-foreground: 95 45% 98%;
 
-    /* Flavor colors */
-    --flavor-mint: 160 50% 55%;
-    --flavor-pink: 350 70% 75%;
-    --flavor-red: 5 75% 55%;
-    --flavor-teal: 180 50% 45%;
-    --flavor-rust: 25 65% 45%;
-    --flavor-gold: 45 80% 55%;
+    /* Flavor colors - extracted from actual packaging */
+    --flavor-cream-onion: 195 55% 65%;      /* Light teal-blue from Cream & Onion */
+    --flavor-himalayan: 340 35% 75%;        /* Dusty pink from Himalayan Salt */
+    --flavor-peri-peri: 35 65% 70%;         /* Warm cream/orange from Peri Peri */
+    --flavor-mint: 95 45% 55%;              /* Fresh green from Pudina */
+    --flavor-tandoori: 15 55% 35%;          /* Rich brown from Tandoori */
+    --flavor-gold: 45 75% 60%;              /* Golden yellow */
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
     /* Borders */
-    --border: 40 30% 85%;
-    --input: 40 30% 85%;
-    --ring: 15 70% 45%;
+    --border: 42 30% 85%;
+    --input: 42 30% 85%;
+    --ring: 15 55% 35%;
 
     --radius: 1rem;
 
-    /* Gradients */
-    --gradient-cream: linear-gradient(135deg, hsl(40 30% 97%) 0%, hsl(35 40% 94%) 100%);
-    --gradient-mint: linear-gradient(135deg, hsl(160 50% 85%) 0%, hsl(160 50% 95%) 100%);
-    --gradient-pink: linear-gradient(135deg, hsl(350 70% 92%) 0%, hsl(350 70% 97%) 100%);
-    --gradient-rust: linear-gradient(135deg, hsl(25 65% 90%) 0%, hsl(25 65% 96%) 100%);
-    --gradient-teal: linear-gradient(135deg, hsl(180 50% 88%) 0%, hsl(180 50% 96%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(40 30% 97%) 0%, hsl(35 45% 92%) 100%);
+    /* Gradients based on packaging colors */
+    --gradient-cream: linear-gradient(135deg, hsl(42 45% 95%) 0%, hsl(40 50% 90%) 100%);
+    --gradient-cream-onion: linear-gradient(135deg, hsl(195 55% 85%) 0%, hsl(195 55% 92%) 100%);
+    --gradient-himalayan: linear-gradient(135deg, hsl(340 35% 88%) 0%, hsl(340 35% 94%) 100%);
+    --gradient-peri-peri: linear-gradient(135deg, hsl(35 65% 88%) 0%, hsl(35 65% 95%) 100%);
+    --gradient-mint: linear-gradient(135deg, hsl(95 45% 85%) 0%, hsl(95 45% 92%) 100%);
+    --gradient-tandoori: linear-gradient(135deg, hsl(15 55% 85%) 0%, hsl(15 55% 92%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(42 45% 95%) 0%, hsl(40 50% 88%) 100%);
 
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(25 30% 20% / 0.08);
@@ -67,14 +68,14 @@
     --shadow-glow: 0 0 30px hsl(var(--primary) / 0.2);
 
     /* Sidebar */
-    --sidebar-background: 40 30% 97%;
+    --sidebar-background: 42 45% 95%;
     --sidebar-foreground: 25 30% 15%;
-    --sidebar-primary: 15 70% 45%;
-    --sidebar-primary-foreground: 40 30% 98%;
-    --sidebar-accent: 40 35% 92%;
+    --sidebar-primary: 15 55% 35%;
+    --sidebar-primary-foreground: 42 45% 98%;
+    --sidebar-accent: 42 40% 90%;
     --sidebar-accent-foreground: 25 30% 20%;
-    --sidebar-border: 40 30% 85%;
-    --sidebar-ring: 15 70% 45%;
+    --sidebar-border: 42 30% 85%;
+    --sidebar-ring: 15 55% 35%;
   }
 
   .dark {
@@ -136,20 +137,24 @@
     background: var(--gradient-cream);
   }
 
+  .gradient-cream-onion {
+    background: var(--gradient-cream-onion);
+  }
+
+  .gradient-himalayan {
+    background: var(--gradient-himalayan);
+  }
+
+  .gradient-peri-peri {
+    background: var(--gradient-peri-peri);
+  }
+
   .gradient-mint {
     background: var(--gradient-mint);
   }
 
-  .gradient-pink {
-    background: var(--gradient-pink);
-  }
-
-  .gradient-rust {
-    background: var(--gradient-rust);
-  }
-
-  .gradient-teal {
-    background: var(--gradient-teal);
+  .gradient-tandoori {
+    background: var(--gradient-tandoori);
   }
 
   .gradient-hero {

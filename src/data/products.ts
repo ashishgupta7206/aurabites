@@ -16,7 +16,7 @@ export interface Product {
   originalPrice?: number;
   protein: string;
   category: 'roasted' | 'raw' | 'dryfruits';
-  flavorColor: 'mint' | 'pink' | 'red' | 'teal' | 'rust' | 'gold';
+  flavorColor: 'cream-onion' | 'himalayan' | 'peri-peri' | 'mint' | 'tandoori' | 'gold';
   image: string;
   badge?: string;
   isNew?: boolean;
@@ -33,7 +33,7 @@ export const products: Product[] = [
     originalPrice: 179,
     protein: '10g',
     category: 'roasted',
-    flavorColor: 'mint',
+    flavorColor: 'cream-onion',
     image: productCreamOnion,
     isBestseller: true,
   },
@@ -46,7 +46,7 @@ export const products: Product[] = [
     originalPrice: 179,
     protein: '10g',
     category: 'roasted',
-    flavorColor: 'red',
+    flavorColor: 'peri-peri',
     image: productPeriPeri,
     isBestseller: true,
   },
@@ -58,7 +58,7 @@ export const products: Product[] = [
     price: 139,
     protein: '10g',
     category: 'roasted',
-    flavorColor: 'pink',
+    flavorColor: 'himalayan',
     image: productPinkSalt,
   },
   {
@@ -76,25 +76,25 @@ export const products: Product[] = [
   },
   {
     id: 'p5',
-    name: 'Aurabites Tandoori Twist',
-    flavor: 'Tandoori Twist',
+    name: 'Aurabites Tandoori Masala',
+    flavor: 'Tandoori Masala',
     description: 'Smoky, spicy, and authentically Indian',
     price: 149,
     protein: '10g',
     category: 'roasted',
-    flavorColor: 'rust',
+    flavorColor: 'tandoori',
     image: productTandoori,
     isBestseller: true,
   },
   {
     id: 'p6',
-    name: 'Aurabites Mint Magic',
-    flavor: 'Mint Magic',
+    name: 'Aurabites Mint Pudina',
+    flavor: 'Mint Pudina',
     description: 'Refreshing, cool, and delightfully crunchy',
     price: 149,
     protein: '10g',
     category: 'roasted',
-    flavorColor: 'teal',
+    flavorColor: 'mint',
     image: productMint,
   },
   {
@@ -105,7 +105,7 @@ export const products: Product[] = [
     price: 129,
     protein: '10g',
     category: 'roasted',
-    flavorColor: 'mint',
+    flavorColor: 'himalayan',
     image: productSalted,
   },
   {
@@ -117,7 +117,7 @@ export const products: Product[] = [
     originalPrice: 189,
     protein: '10g',
     category: 'roasted',
-    flavorColor: 'rust',
+    flavorColor: 'tandoori',
     image: productBbq,
     isNew: true,
   },
