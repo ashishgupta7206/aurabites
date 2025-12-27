@@ -1,22 +1,51 @@
-import { useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { products } from '@/data/products';
 import { ProductCard } from './ProductCard';
 import { Button } from '@/components/ui/button';
 
 export const FeaturedProducts = () => {
   const featured = products.filter(p => p.isBestseller || p.isNew).slice(0, 6);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'start',
+    loop: false,
+    skipSnaps: false,
+    dragFree: true,
+  });
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = 320;
-      scrollRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  const scrollSnaps = emblaApi?.scrollSnapList() || [];
 
   return (
     <section className="py-16 md:py-24 bg-background">
@@ -40,35 +69,52 @@ export const FeaturedProducts = () => {
             <Button
               variant="outline"
               size="icon"
-              className="rounded-full"
-              onClick={() => scroll('left')}
+              className="rounded-full transition-opacity"
+              onClick={scrollPrev}
+              disabled={!canScrollPrev}
             >
               <ChevronLeft className="w-5 h-5" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              className="rounded-full"
-              onClick={() => scroll('right')}
+              className="rounded-full transition-opacity"
+              onClick={scrollNext}
+              disabled={!canScrollNext}
             >
               <ChevronRight className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
-        {/* Horizontal Slider */}
-        <div 
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto pb-4 scroll-snap-x scrollbar-hide -mx-4 px-4"
-        >
-          {featured.map((product, index) => (
-            <div
-              key={product.id}
-              className="min-w-[180px] md:min-w-[200px] flex-shrink-0 animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <ProductCard product={product} />
-            </div>
+        {/* Embla Carousel */}
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-4">
+            {featured.map((product, index) => (
+              <div
+                key={product.id}
+                className="flex-[0_0_calc(50%-8px)] sm:flex-[0_0_calc(33.333%-11px)] lg:flex-[0_0_calc(25%-12px)] min-w-0 animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <ProductCard product={product} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Dot indicators */}
+        <div className="flex justify-center gap-2 mt-6">
+          {scrollSnaps.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => emblaApi?.scrollTo(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === selectedIndex 
+                  ? 'bg-primary w-6' 
+                  : 'bg-primary/30 hover:bg-primary/50'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
           ))}
         </div>
       </div>
