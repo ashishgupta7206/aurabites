@@ -4,6 +4,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Product } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 
 interface ProductCardProps {
   product: Product;
@@ -38,25 +39,44 @@ const flavorButtonColors: Record<string, string> = {
 };
 
 export const ProductCard = ({ product }: ProductCardProps) => {
-  const [quantity, setQuantity] = useState(1);
-  const { addToCart } = useCart();
+  const { items, addToCart, removeFromCart, updateQuantity } = useCart();
+  const cartItem = items.find(item => item.id === product.id);
+  const quantityInCart = cartItem ? cartItem.quantity : 0;
 
   const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      addToCart({
-        id: product.id,
-        name: product.name,
-        flavor: product.flavor,
-        price: product.price,
-        image: product.image,
-        flavorColor: product.flavorColor,
-      });
-    }
+    addToCart({
+      id: product.id,
+      name: product.name,
+      flavor: product.flavor,
+      price: product.price,
+      image: product.image,
+      flavorColor: product.flavorColor,
+      quantity: 1,
+    });
     toast({
       title: "Added to cart! 🎉",
-      description: `${quantity}x ${product.flavor} makhana`,
+      description: `${product.flavor} makhana`,
     });
-    setQuantity(1);
+  };
+
+  const handleIncrement = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      flavor: product.flavor,
+      price: product.price,
+      image: product.image,
+      flavorColor: product.flavorColor,
+      quantity: 1,
+    });
+  };
+
+  const handleDecrement = () => {
+    if (quantityInCart > 1) {
+      updateQuantity(product.id, quantityInCart - 1);
+    } else {
+      removeFromCart(product.id);
+    }
   };
 
   return (
@@ -83,68 +103,78 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </div>
 
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-        />
-        {/* Floating decorations */}
-        <div className="absolute bottom-3 right-3 text-xl opacity-40 animate-float-slow">✨</div>
-      </div>
+      <Link to={`/product/${product.id}`}>
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          />
+          {/* Floating decorations */}
+          <div className="absolute bottom-3 right-3 text-xl opacity-40 animate-float-slow">✨</div>
+        </div>
+      </Link>
+
 
       {/* Content */}
       <div className="p-4 pt-4 space-y-3">
-        <div>
-          <h3 className="font-display font-bold text-xl text-foreground leading-tight">
-            {product.flavor}
-          </h3>
-          <p className="text-base text-muted-foreground mt-2 line-clamp-2">
-            {product.description}
-          </p>
-        </div>
+        <Link to={`/product/${product.id}`}>
+          <div>
 
-        {/* Price */}
-        <div className="flex items-baseline gap-2">
-          <span className="font-display font-extrabold text-2xl text-foreground">
-            ₹{product.price}
-          </span>
-          {product.originalPrice && (
-            <span className="text-base text-muted-foreground line-through">
-              ₹{product.originalPrice}
-            </span>
-          )}
-        </div>
+            <h3 className="font-display font-bold text-xl text-foreground leading-tight">
+              {product.flavor}
+            </h3>
+            <p className="text-base text-muted-foreground mt-2 line-clamp-2">
+              {product.description}
+            </p>
 
-        {/* Quantity & Add to Cart */}
-        <div className="flex items-center gap-2">
-          {/* Quantity Selector */}
-          <div className="flex items-center bg-secondary rounded-full">
-            <button
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Minus className="w-4 h-4" />
-            </button>
-            <span className="w-8 text-center font-semibold text-sm">{quantity}</span>
-            <button
-              onClick={() => setQuantity(quantity + 1)}
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
           </div>
 
-          {/* Add to Cart */}
-          <Button
-            onClick={handleAddToCart}
-            className={`flex-1 rounded-full font-semibold text-white ${flavorButtonColors[product.flavorColor]}`}
-          >
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            Add to Cart
-          </Button>
+          {/* Price */}
+          <div className="flex items-baseline gap-2">
+            <span className="font-display font-extrabold text-2xl text-foreground">
+              ₹{product.price}
+            </span>
+            {product.originalPrice && (
+              <span className="text-base text-muted-foreground line-through">
+                ₹{product.originalPrice}
+              </span>
+            )}
+
+          </div>
+        </Link>
+
+        {/* Quantity & Add to Cart */}
+        <div className="mt-4">
+          {quantityInCart === 0 ? (
+            <Button
+              onClick={handleAddToCart}
+              className={`w-full rounded-full font-semibold text-white transition-all duration-300 ${flavorButtonColors[product.flavorColor]}`}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
+            </Button>
+          ) : (
+            <div className="flex items-center justify-between bg-secondary rounded-full p-1 animate-in fade-in zoom-in duration-200">
+              <button
+                onClick={handleDecrement}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-background/50 hover:bg-background text-foreground transition-colors shadow-sm"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="font-display font-bold text-lg w-8 text-center">
+                {quantityInCart}
+              </span>
+              <button
+                onClick={handleIncrement}
+                className={`w-10 h-10 flex items-center justify-center rounded-full text-white transition-colors shadow-sm ${flavorButtonColors[product.flavorColor]}`}
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };

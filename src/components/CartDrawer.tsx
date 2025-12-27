@@ -9,7 +9,7 @@ export const CartDrawer = () => {
 
   return (
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl md:max-w-md md:h-full md:rounded-none md:right-0 md:left-auto">
+      <SheetContent side="bottom" className="h-[85vh] flex flex-col rounded-t-3xl md:max-w-md md:h-full md:rounded-none md:right-0 md:left-auto">
         <SheetHeader className="pb-4 border-b border-border">
           <div className="flex items-center justify-between">
             <SheetTitle className="font-display text-xl">
@@ -24,7 +24,7 @@ export const CartDrawer = () => {
               <ShoppingBag className="w-16 h-16 text-muted-foreground/30 mb-4" />
               <p className="text-lg font-medium text-muted-foreground">Your cart is empty</p>
               <p className="text-sm text-muted-foreground mt-1">Add some delicious makhana!</p>
-              <Button 
+              <Button
                 onClick={() => setIsCartOpen(false)}
                 className="mt-6 rounded-full"
               >

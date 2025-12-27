@@ -5,6 +5,8 @@ import { products, reviews } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { CartBar } from '@/components/CartBar';
+import { CartDrawer } from '@/components/CartDrawer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,7 +18,7 @@ import { Helmet } from 'react-helmet-async';
 const ProductDetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { addToCart, setIsCartOpen } = useCart();
+    const { items, addToCart, removeFromCart, updateQuantity, setIsCartOpen } = useCart();
     const { toast } = useToast();
 
     const product = products.find((p) => p.id === id);
@@ -24,16 +26,18 @@ const ProductDetailPage = () => {
 
     // State
     const [selectedWeight, setSelectedWeight] = useState('100g');
-    const [quantity, setQuantity] = useState(1);
     const [activeImage, setActiveImage] = useState(product?.image);
     const [pincode, setPincode] = useState('');
     const [deliveryStatus, setDeliveryStatus] = useState<null | 'success' | 'error'>(null);
+
+    // Get quantity from cart
+    const cartItem = items.find(item => item.id === product?.id);
+    const quantityInCart = cartItem ? cartItem.quantity : 0;
 
     // Reset state when product changes
     useEffect(() => {
         if (product) {
             setActiveImage(product.image);
-            setQuantity(1);
             setSelectedWeight('100g');
             window.scrollTo(0, 0);
         }
@@ -77,17 +81,47 @@ const ProductDetailPage = () => {
             price: currentPrice,
             image: product.image,
             flavorColor: product.flavorColor,
-            quantity: quantity,
+            quantity: 1,
         });
         toast({
             title: "Added to cart",
-            description: `${quantity} x ${product.name} (${selectedWeight}) added.`,
+            description: `${product.name} (${selectedWeight}) added.`,
         });
         setIsCartOpen(true);
     };
 
+    const handleIncrement = () => {
+        addToCart({
+            id: product.id,
+            name: product.name,
+            flavor: product.flavor,
+            price: currentPrice,
+            image: product.image,
+            flavorColor: product.flavorColor,
+            quantity: 1
+        });
+    };
+
+    const handleDecrement = () => {
+        if (quantityInCart > 1) {
+            updateQuantity(product.id, quantityInCart - 1);
+        } else {
+            removeFromCart(product.id);
+        }
+    };
+
     const handleBuyNow = () => {
-        handleAddToCart();
+        if (quantityInCart === 0) {
+            addToCart({
+                id: product.id,
+                name: product.name,
+                flavor: product.flavor,
+                price: currentPrice,
+                image: product.image,
+                flavorColor: product.flavorColor,
+                quantity: 1,
+            });
+        }
         navigate('/checkout');
     };
 
@@ -238,29 +272,32 @@ const ProductDetailPage = () => {
 
                             {/* Quantity & Actions */}
                             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                                <div className="flex items-center border-2 border-input rounded-xl bg-white w-fit">
-                                    <button
-                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="p-3 hover:text-primary transition-colors"
+                                {quantityInCart === 0 ? (
+                                    <Button
+                                        size="lg"
+                                        className="flex-1 text-base h-auto py-3 rounded-xl shadow-glow hover:shadow-lg transition-all"
+                                        onClick={handleAddToCart}
                                     >
-                                        <Minus className="w-4 h-4" />
-                                    </button>
-                                    <span className="w-12 text-center font-bold text-lg">{quantity}</span>
-                                    <button
-                                        onClick={() => setQuantity(quantity + 1)}
-                                        className="p-3 hover:text-primary transition-colors"
-                                    >
-                                        <Plus className="w-4 h-4" />
-                                    </button>
-                                </div>
+                                        Add to Cart
+                                    </Button>
+                                ) : (
+                                    <div className="flex-1 flex items-center justify-between border-2 border-primary/20 rounded-xl bg-primary/5 p-1 h-auto min-h-[52px]">
+                                        <button
+                                            onClick={handleDecrement}
+                                            className="w-12 h-full flex items-center justify-center rounded-lg hover:bg-white text-primary transition-colors"
+                                        >
+                                            <Minus className="w-5 h-5" />
+                                        </button>
+                                        <span className="font-display font-bold text-xl text-primary">{quantityInCart}</span>
+                                        <button
+                                            onClick={handleIncrement}
+                                            className="w-12 h-full flex items-center justify-center rounded-lg hover:bg-white text-primary transition-colors"
+                                        >
+                                            <Plus className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                )}
 
-                                <Button
-                                    size="lg"
-                                    className="flex-1 text-base h-auto py-3 rounded-xl shadow-glow hover:shadow-lg transition-all"
-                                    onClick={handleAddToCart}
-                                >
-                                    Add to Cart
-                                </Button>
                                 <Button
                                     size="lg"
                                     variant="secondary"
@@ -445,6 +482,8 @@ const ProductDetailPage = () => {
                 </main>
 
                 <Footer />
+                <CartBar />
+                <CartDrawer />
             </div>
         </>
     );
