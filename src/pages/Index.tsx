@@ -1,13 +1,36 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Helmet } from 'react-helmet-async';
+import { Navbar } from '@/components/Navbar';
+import { HeroSection } from '@/components/HeroSection';
+import { FeaturedProducts } from '@/components/FeaturedProducts';
+import { CategoriesSection } from '@/components/CategoriesSection';
+import { AllProducts } from '@/components/AllProducts';
+import { ReviewsSection } from '@/components/ReviewsSection';
+import { Footer } from '@/components/Footer';
+import { CartBar } from '@/components/CartBar';
+import { CartDrawer } from '@/components/CartDrawer';
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <>
+      <Helmet>
+        <title>Aurabites – Premium Makhana Snacks | Healthy & Delicious</title>
+        <meta name="description" content="Discover Aurabites premium roasted makhana snacks. 10g protein, natural ingredients, zero preservatives. India's favorite healthy snack brand." />
+      </Helmet>
+
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main>
+          <HeroSection />
+          <FeaturedProducts />
+          <CategoriesSection />
+          <AllProducts />
+          <ReviewsSection />
+        </main>
+        <Footer />
+        <CartBar />
+        <CartDrawer />
       </div>
-    </div>
+    </>
   );
 };
 
