@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -17,6 +26,7 @@ export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { totalItems, setIsCartOpen } = useCart();
+  const { user, logout } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -29,9 +39,8 @@ export const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'navbar-solid' : 'navbar-transparent bg-background/80 backdrop-blur-sm'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'navbar-solid' : 'navbar-transparent bg-background/80 backdrop-blur-sm'
+        }`}
     >
       <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
@@ -48,11 +57,10 @@ export const Navbar = () => {
             <li key={link.path}>
               <Link
                 to={link.path}
-                className={`font-medium text-sm transition-colors hover:text-primary ${
-                  location.pathname === link.path
-                    ? 'text-primary'
-                    : 'text-foreground/70'
-                }`}
+                className={`font-medium text-sm transition-colors hover:text-primary ${location.pathname === link.path
+                  ? 'text-primary'
+                  : 'text-foreground/70'
+                  }`}
               >
                 {link.name}
               </Link>
@@ -61,13 +69,37 @@ export const Navbar = () => {
         </ul>
 
         {/* Actions */}
+        {/* Actions */}
         <div className="flex items-center gap-2">
-          <Link to="/login">
-            <Button variant="ghost" size="icon" className="hidden md:flex rounded-full">
-              <User className="h-5 w-5" />
-            </Button>
-          </Link>
-          
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="hidden md:flex rounded-full">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 focus:text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/login">
+              <Button variant="ghost" size="icon" className="hidden md:flex rounded-full">
+                <User className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -96,23 +128,34 @@ export const Navbar = () => {
                     key={link.path}
                     to={link.path}
                     onClick={() => setIsMobileOpen(false)}
-                    className={`font-display font-semibold text-lg py-2 transition-colors ${
-                      location.pathname === link.path
-                        ? 'text-primary'
-                        : 'text-foreground/70'
-                    }`}
+                    className={`font-display font-semibold text-lg py-2 transition-colors ${location.pathname === link.path
+                      ? 'text-primary'
+                      : 'text-foreground/70'
+                      }`}
                   >
                     {link.name}
                   </Link>
                 ))}
                 <hr className="my-2 border-border" />
-                <Link
-                  to="/login"
-                  onClick={() => setIsMobileOpen(false)}
-                  className="font-display font-semibold text-lg py-2 text-foreground/70"
-                >
-                  Login
-                </Link>
+                {user ? (
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsMobileOpen(false);
+                    }}
+                    className="font-display font-semibold text-lg py-2 text-foreground/70 text-left"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMobileOpen(false)}
+                    className="font-display font-semibold text-lg py-2 text-foreground/70"
+                  >
+                    Login
+                  </Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
