@@ -12,6 +12,7 @@ import CategoriesPage from "./pages/CategoriesPage";
 import CategoryPage from "./pages/CategoryPage";
 import LoginPage from "./pages/LoginPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
@@ -31,7 +32,8 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/shop" element={<ShopPage />} />
                 <Route path="/categories" element={<CategoriesPage />} />
-                <Route path="/category/:slug" element={<CategoryPage />} />
+                <Route path="/category/:id" element={<CategoryPage />} />
+                <Route path="/product/:id" element={<ProductDetailPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
                 <Route path="/about" element={<AboutPage />} />

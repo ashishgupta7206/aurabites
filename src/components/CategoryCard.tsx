@@ -50,7 +50,7 @@ export const CategoryCard = ({ category }: CategoryCardProps) => {
   }
 
   return (
-    <Link to={`/category/${category.slug}`} className="group">
+    <Link to={`/category/${category.id}`} className="group">
       {content}
     </Link>
   );

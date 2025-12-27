@@ -10,9 +10,9 @@ import { products, categories } from '@/data/products';
 import { Button } from '@/components/ui/button';
 
 const CategoryPage = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const category = categories.find(c => c.slug === slug);
-  const categoryProducts = products.filter(p => p.category === slug);
+  const { id } = useParams<{ id: string }>();
+  const category = categories.find(c => c.id === id);
+  const categoryProducts = products.filter(p => p.categoryId === id);
 
   if (!category) {
     return (
@@ -36,7 +36,7 @@ const CategoryPage = () => {
 
       <div className="min-h-screen bg-background">
         <Navbar />
-        
+
         <main className="pt-24 pb-32 md:pb-16">
           {/* Header */}
           <section className={`${category.gradient} py-12 md:py-20`}>
@@ -45,7 +45,7 @@ const CategoryPage = () => {
                 <ArrowLeft className="w-4 h-4" />
                 Back to Home
               </Link>
-              
+
               <div className="flex items-center gap-4">
                 <span className="text-5xl">{category.icon}</span>
                 <div>

@@ -15,7 +15,7 @@ export interface Product {
   price: number;
   originalPrice?: number;
   protein: string;
-  category: 'roasted' | 'raw' | 'dryfruits';
+  categoryId: string;
   flavorColor: 'cream-onion' | 'himalayan' | 'peri-peri' | 'mint' | 'tandoori' | 'gold';
   image: string;
   badge?: string;
@@ -32,7 +32,7 @@ export const products: Product[] = [
     price: 149,
     originalPrice: 179,
     protein: '10g',
-    category: 'roasted',
+    categoryId: 'c1',
     flavorColor: 'cream-onion',
     image: productCreamOnion,
     isBestseller: true,
@@ -45,7 +45,7 @@ export const products: Product[] = [
     price: 149,
     originalPrice: 179,
     protein: '10g',
-    category: 'roasted',
+    categoryId: 'c1',
     flavorColor: 'peri-peri',
     image: productPeriPeri,
     isBestseller: true,
@@ -57,7 +57,7 @@ export const products: Product[] = [
     description: 'Pure, simple, and perfectly salted',
     price: 139,
     protein: '10g',
-    category: 'roasted',
+    categoryId: 'c1',
     flavorColor: 'himalayan',
     image: productPinkSalt,
   },
@@ -69,7 +69,7 @@ export const products: Product[] = [
     price: 159,
     originalPrice: 189,
     protein: '10g',
-    category: 'roasted',
+    categoryId: 'c1',
     flavorColor: 'gold',
     image: productCheese,
     isNew: true,
@@ -81,7 +81,7 @@ export const products: Product[] = [
     description: 'Smoky, spicy, and authentically Indian',
     price: 149,
     protein: '10g',
-    category: 'roasted',
+    categoryId: 'c1',
     flavorColor: 'tandoori',
     image: productTandoori,
     isBestseller: true,
@@ -93,7 +93,7 @@ export const products: Product[] = [
     description: 'Refreshing, cool, and delightfully crunchy',
     price: 149,
     protein: '10g',
-    category: 'roasted',
+    categoryId: 'c1',
     flavorColor: 'mint',
     image: productMint,
   },
@@ -104,7 +104,7 @@ export const products: Product[] = [
     description: 'The OG snack, lightly salted perfection',
     price: 129,
     protein: '10g',
-    category: 'roasted',
+    categoryId: 'c1',
     flavorColor: 'himalayan',
     image: productSalted,
   },
@@ -116,7 +116,7 @@ export const products: Product[] = [
     price: 159,
     originalPrice: 189,
     protein: '10g',
-    category: 'roasted',
+    categoryId: 'c1',
     flavorColor: 'tandoori',
     image: productBbq,
     isNew: true,
