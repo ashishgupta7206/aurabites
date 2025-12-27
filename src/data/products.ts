@@ -9,6 +9,7 @@ import productBbq from '@/assets/product-bbq.png';
 
 export interface Product {
   id: string;
+  productId: number;
   name: string;
   flavor: string;
   description: string;
@@ -16,7 +17,7 @@ export interface Product {
   originalPrice?: number;
   protein: string;
   categoryId: string;
-  flavorColor: 'cream-onion' | 'himalayan' | 'peri-peri' | 'mint' | 'tandoori' | 'gold';
+  flavorColor: string;
   image: string;
   badge?: string;
   isNew?: boolean;
@@ -26,6 +27,7 @@ export interface Product {
 export const products: Product[] = [
   {
     id: 'p1',
+    productId: 1,
     name: 'Aurabites Cream & Onion',
     flavor: 'Cream & Onion',
     description: 'Creamy, tangy, and irresistibly crunchy',
@@ -39,6 +41,7 @@ export const products: Product[] = [
   },
   {
     id: 'p2',
+    productId: 2,
     name: 'Aurabites Peri Peri',
     flavor: 'Peri Peri',
     description: 'Spicy, smoky, and full of zing',
@@ -52,6 +55,7 @@ export const products: Product[] = [
   },
   {
     id: 'p3',
+    productId: 3,
     name: 'Aurabites Himalayan Pink Salt',
     flavor: 'Himalayan Pink Salt',
     description: 'Pure, simple, and perfectly salted',
@@ -63,6 +67,7 @@ export const products: Product[] = [
   },
   {
     id: 'p4',
+    productId: 4,
     name: 'Aurabites Cheese Blast',
     flavor: 'Cheese Blast',
     description: 'Rich, cheesy, and utterly addictive',
@@ -76,6 +81,7 @@ export const products: Product[] = [
   },
   {
     id: 'p5',
+    productId: 5,
     name: 'Aurabites Tandoori Masala',
     flavor: 'Tandoori Masala',
     description: 'Smoky, spicy, and authentically Indian',
@@ -85,42 +91,7 @@ export const products: Product[] = [
     flavorColor: 'tandoori',
     image: productTandoori,
     isBestseller: true,
-  },
-  {
-    id: 'p6',
-    name: 'Aurabites Mint Pudina',
-    flavor: 'Mint Pudina',
-    description: 'Refreshing, cool, and delightfully crunchy',
-    price: 149,
-    protein: '10g',
-    categoryId: 'c1',
-    flavorColor: 'mint',
-    image: productMint,
-  },
-  {
-    id: 'p7',
-    name: 'Aurabites Classic Salted',
-    flavor: 'Classic Salted',
-    description: 'The OG snack, lightly salted perfection',
-    price: 129,
-    protein: '10g',
-    categoryId: 'c1',
-    flavorColor: 'himalayan',
-    image: productSalted,
-  },
-  {
-    id: 'p8',
-    name: 'Aurabites BBQ Blaze',
-    flavor: 'BBQ Blaze',
-    description: 'Sweet, smoky, and utterly satisfying',
-    price: 159,
-    originalPrice: 189,
-    protein: '10g',
-    categoryId: 'c1',
-    flavorColor: 'tandoori',
-    image: productBbq,
-    isNew: true,
-  },
+  }
 ];
 
 export interface Category {

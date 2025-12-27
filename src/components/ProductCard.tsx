@@ -43,6 +43,31 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   const cartItem = items.find(item => item.id === product.id);
   const quantityInCart = cartItem ? cartItem.quantity : 0;
 
+  const isPredefined = flavorGradients[product.flavorColor];
+
+  // Dynamic Styles if not predefined
+  const dynamicCardStyle = !isPredefined ? {
+    background: `linear-gradient(135deg, ${product.flavorColor} 0%, #ffffff 100%)`, // Gradient from flavor color to white
+    borderColor: product.flavorColor,
+  } : {};
+
+  const dynamicBadgeStyle = !isPredefined ? {
+    backgroundColor: product.flavorColor,
+    color: '#333' // Assuming dark text for light colors, ideally should contrast check
+  } : {};
+
+  const dynamicButtonStyle = !isPredefined ? {
+    backgroundColor: product.flavorColor,
+    color: '#000' // Better contrast usually for buttons with lightish bgs? Or White?
+    // Given aurabites design, buttons are usually dark/saturated. 
+    // If the API returns light colors like #FFF0CC, white text is bad.
+    // But let's assume the API returns a usable main color.
+    // For safety, let's use black text for dynamic button if unsure, or white if dark. 
+    // Without color manipulation lib, hard to guess. 
+    // Let's stick to black text for safety on light/pastel package colors
+  } : {};
+
+
   const handleAddToCart = () => {
     addToCart({
       id: product.id,
@@ -80,7 +105,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className={`group relative ${flavorGradients[product.flavorColor]} rounded-3xl border overflow-hidden product-card-hover shadow-soft`}>
+    <div
+      className={`group relative rounded-3xl border overflow-hidden product-card-hover shadow-soft ${isPredefined ? flavorGradients[product.flavorColor] : ''}`}
+      style={dynamicCardStyle}
+    >
       {/* Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
         {product.isBestseller && (
@@ -97,13 +125,16 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Protein Badge */}
       <div className="absolute top-3 right-3 z-10">
-        <span className={`px-2 py-1 ${flavorBadgeColors[product.flavorColor]} text-xs font-bold rounded-full`}>
+        <span
+          className={`px-2 py-1 text-xs font-bold rounded-full ${isPredefined ? flavorBadgeColors[product.flavorColor] : ''}`}
+          style={dynamicBadgeStyle}
+        >
           {product.protein} Protein
         </span>
       </div>
 
       {/* Image */}
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/product/${product.productId}`}>
         <div className="relative aspect-[4/3] overflow-hidden">
           <img
             src={product.image}
@@ -118,11 +149,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Content */}
       <div className="p-4 pt-4 space-y-3">
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${product.productId}`}>
           <div>
 
             <h3 className="font-display font-bold text-xl text-foreground leading-tight">
-              {product.flavor}
+              {product.name}
             </h3>
             <p className="text-base text-muted-foreground mt-2 line-clamp-2">
               {product.description}
@@ -149,7 +180,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {quantityInCart === 0 ? (
             <Button
               onClick={handleAddToCart}
-              className={`w-full rounded-full font-semibold text-white transition-all duration-300 ${flavorButtonColors[product.flavorColor]}`}
+              className={`w-full rounded-full font-semibold text-white transition-all duration-300 ${isPredefined ? flavorButtonColors[product.flavorColor] : ''}`}
+              style={!isPredefined ? { backgroundColor: product.flavorColor, color: '#000' } : {}}
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
               Add to Cart
@@ -167,7 +199,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               </span>
               <button
                 onClick={handleIncrement}
-                className={`w-10 h-10 flex items-center justify-center rounded-full text-white transition-colors shadow-sm ${flavorButtonColors[product.flavorColor]}`}
+                className={`w-10 h-10 flex items-center justify-center rounded-full text-white transition-colors shadow-sm ${isPredefined ? flavorButtonColors[product.flavorColor] : ''}`}
+                style={!isPredefined ? { backgroundColor: product.flavorColor, color: '#000' } : {}}
               >
                 <Plus className="w-4 h-4" />
               </button>
