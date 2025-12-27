@@ -90,27 +90,27 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
         {/* Floating decorations */}
-        <div className="absolute bottom-3 right-3 text-2xl opacity-40 animate-float-slow">✨</div>
+        <div className="absolute bottom-3 right-3 text-xl opacity-40 animate-float-slow">✨</div>
       </div>
 
       {/* Content */}
-      <div className="p-4 pt-0 space-y-3">
+      <div className="p-4 pt-4 space-y-3">
         <div>
-          <h3 className="font-display font-bold text-lg text-foreground leading-tight">
+          <h3 className="font-display font-bold text-xl text-foreground leading-tight">
             {product.flavor}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+          <p className="text-base text-muted-foreground mt-2 line-clamp-2">
             {product.description}
           </p>
         </div>
 
         {/* Price */}
         <div className="flex items-baseline gap-2">
-          <span className="font-display font-extrabold text-xl text-foreground">
+          <span className="font-display font-extrabold text-2xl text-foreground">
             ₹{product.price}
           </span>
           {product.originalPrice && (
-            <span className="text-sm text-muted-foreground line-through">
+            <span className="text-base text-muted-foreground line-through">
               ₹{product.originalPrice}
             </span>
           )}
