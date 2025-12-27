@@ -8,7 +8,7 @@ interface CategoryCardProps {
 
 export const CategoryCard = ({ category }: CategoryCardProps) => {
   const content = (
-    <div className={`relative ${category.gradient} rounded-3xl p-6 md:p-8 min-w-[280px] md:min-w-[320px] overflow-hidden product-card-hover border border-border/50`}>
+    <div className={`relative ${category.gradient} rounded-3xl p-6 md:p-8 min-w-[280px] md:min-w-[320px] h-[220px] overflow-hidden product-card-hover border border-border/50`}>
       {/* Coming Soon Badge */}
       {category.comingSoon && (
         <div className="absolute top-4 right-4">

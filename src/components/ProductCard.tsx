@@ -9,31 +9,32 @@ interface ProductCardProps {
   product: Product;
 }
 
+// Colors extracted from actual Aurabites packaging
 const flavorGradients: Record<string, string> = {
-  mint: 'from-emerald-50 to-teal-50 border-emerald-200',
-  pink: 'from-pink-50 to-rose-50 border-pink-200',
-  red: 'from-red-50 to-orange-50 border-red-200',
-  teal: 'from-cyan-50 to-sky-50 border-cyan-200',
-  rust: 'from-orange-50 to-amber-50 border-orange-200',
-  gold: 'from-yellow-50 to-amber-50 border-yellow-200',
+  'cream-onion': 'gradient-cream-onion border-[hsl(195_55%_75%)]',
+  himalayan: 'gradient-himalayan border-[hsl(340_35%_80%)]',
+  'peri-peri': 'gradient-peri-peri border-[hsl(35_65%_80%)]',
+  mint: 'gradient-mint border-[hsl(95_45%_70%)]',
+  tandoori: 'gradient-tandoori border-[hsl(15_55%_70%)]',
+  gold: 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200',
 };
 
 const flavorBadgeColors: Record<string, string> = {
-  mint: 'bg-emerald-100 text-emerald-700',
-  pink: 'bg-pink-100 text-pink-700',
-  red: 'bg-red-100 text-red-700',
-  teal: 'bg-cyan-100 text-cyan-700',
-  rust: 'bg-orange-100 text-orange-700',
-  gold: 'bg-yellow-100 text-yellow-700',
+  'cream-onion': 'bg-[hsl(195_55%_85%)] text-[hsl(195_55%_30%)]',
+  himalayan: 'bg-[hsl(340_35%_88%)] text-[hsl(340_35%_30%)]',
+  'peri-peri': 'bg-[hsl(35_65%_85%)] text-[hsl(35_65%_30%)]',
+  mint: 'bg-[hsl(95_45%_85%)] text-[hsl(95_45%_25%)]',
+  tandoori: 'bg-[hsl(15_55%_85%)] text-[hsl(15_55%_25%)]',
+  gold: 'bg-amber-100 text-amber-700',
 };
 
 const flavorButtonColors: Record<string, string> = {
-  mint: 'bg-emerald-500 hover:bg-emerald-600',
-  pink: 'bg-pink-500 hover:bg-pink-600',
-  red: 'bg-red-500 hover:bg-red-600',
-  teal: 'bg-cyan-600 hover:bg-cyan-700',
-  rust: 'bg-orange-600 hover:bg-orange-700',
-  gold: 'bg-yellow-500 hover:bg-yellow-600',
+  'cream-onion': 'bg-[hsl(195_55%_45%)] hover:bg-[hsl(195_55%_40%)]',
+  himalayan: 'bg-[hsl(340_35%_55%)] hover:bg-[hsl(340_35%_50%)]',
+  'peri-peri': 'bg-[hsl(25_65%_45%)] hover:bg-[hsl(25_65%_40%)]',
+  mint: 'bg-[hsl(95_45%_40%)] hover:bg-[hsl(95_45%_35%)]',
+  tandoori: 'bg-[hsl(15_55%_35%)] hover:bg-[hsl(15_55%_30%)]',
+  gold: 'bg-amber-500 hover:bg-amber-600',
 };
 
 export const ProductCard = ({ product }: ProductCardProps) => {
@@ -59,7 +60,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className={`group relative bg-gradient-to-br ${flavorGradients[product.flavorColor]} rounded-3xl border overflow-hidden product-card-hover shadow-soft`}>
+    <div className={`group relative ${flavorGradients[product.flavorColor]} rounded-3xl border overflow-hidden product-card-hover shadow-soft`}>
       {/* Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
         {product.isBestseller && (
