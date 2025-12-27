@@ -13,7 +13,7 @@ export const CartDrawer = () => {
         <SheetHeader className="pb-4 border-b border-border">
           <div className="flex items-center justify-between">
             <SheetTitle className="font-display text-xl">
-              Your Cart ({totalItems})
+              Your Cart ({items.length})
             </SheetTitle>
           </div>
         </SheetHeader>
@@ -49,11 +49,11 @@ export const CartDrawer = () => {
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-display font-semibold text-sm truncate">
-                      {item.flavor}
+                    <h4 className="font-display font-semibold text-sm ">
+                      {item.name}
                     </h4>
                     <p className="text-primary font-bold text-sm mt-1">
-                      ₹{item.price}
+                      ₹{item.price.toFixed(2)}
                     </p>
 
                     {/* Quantity Controls */}
@@ -85,7 +85,7 @@ export const CartDrawer = () => {
                   {/* Subtotal */}
                   <div className="text-right">
                     <p className="font-bold text-sm">
-                      ₹{item.price * item.quantity}
+                      ₹{(item.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 </div>

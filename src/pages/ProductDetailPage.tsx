@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { products, reviews } from '@/data/products';
+import { reviews } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -20,107 +20,198 @@ const ProductDetailPage = () => {
     const navigate = useNavigate();
     const { items, addToCart, removeFromCart, updateQuantity, setIsCartOpen } = useCart();
     const { toast } = useToast();
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
-    const product = products.find((p) => p.id === id);
-    const relatedProducts = products.filter((p) => p.category === product?.category && p.id !== id).slice(0, 4);
+    // API Types
+    interface NutritionInfo {
+        id: number;
+        energyKcal: number;
+        proteinG: number;
+        carbohydrateG: number;
+        totalSugarG: number;
+        addedSugarG: number;
+        totalFatG: number;
+        saturatedFatG: number;
+        transFatG: number;
+        cholesterolMg: number;
+        sodiumMg: number;
+        ingredients: string;
+        servingSize: string;
+    }
+
+    interface ProductVariant {
+        id: number;
+        name: string;
+        sku: string;
+        price: number;
+        mrp: number;
+        discountPercent: number;
+        stockQty: number;
+        size: string;
+        weight: string | null;
+        color: string | null;
+        barcode: string | null;
+        isActive: boolean;
+        categorySortOrder: number | null;
+        nutritionInfo: NutritionInfo;
+        rating: string;
+        storageInstructions: string | null;
+        productVariantMktStatus: string;
+        productVariantMktStatusSortOrder: number | null;
+        sortOrder: number | null;
+        productType: string;
+        listOfVariantInCombo: any[];
+        images: { id: number; imageUrl: string; sortOrder: number }[];
+    }
+
+    interface ApiProduct {
+        id: number;
+        name: string;
+        slug: string;
+        shortDescription: string;
+        longDescription: string;
+        mainImage: string;
+        status: string;
+        categoryId: number;
+        categoryName: string;
+        variants: ProductVariant[];
+        images: { id: number; imageUrl: string; sortOrder: number }[];
+    }
+
+    interface ApiResponse {
+        success: boolean;
+        message: string;
+        data: ApiProduct;
+    }
 
     // State
-    const [selectedWeight, setSelectedWeight] = useState('100g');
-    const [activeImage, setActiveImage] = useState(product?.image);
+    const [apiProduct, setApiProduct] = useState<ApiProduct | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
+    const [activeImage, setActiveImage] = useState<string>('');
     const [pincode, setPincode] = useState('');
     const [deliveryStatus, setDeliveryStatus] = useState<null | 'success' | 'error'>(null);
 
-    // Get quantity from cart
-    const cartItem = items.find(item => item.id === product?.id);
-    const quantityInCart = cartItem ? cartItem.quantity : 0;
-
-    // Reset state when product changes
+    // Fetch Product Data
     useEffect(() => {
-        if (product) {
-            setActiveImage(product.image);
-            setSelectedWeight('100g');
+        const fetchProduct = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch(`${API_BASE_URL}/products/${id}`);
+                const data: ApiResponse = await response.json();
+
+                if (data.success && data.data) {
+                    setApiProduct(data.data);
+                    setActiveImage(data.data.mainImage);
+                    // Default to first variant
+                    if (data.data.variants && data.data.variants.length > 0) {
+                        setSelectedVariantId(data.data.variants[0].id);
+                    }
+                } else {
+                    setApiProduct(null); // Explicitly set to null if not successful
+                }
+            } catch (error) {
+                console.error("Failed to fetch product", error);
+                toast({
+                    title: "Error",
+                    description: "Failed to load product details",
+                    variant: "destructive"
+                });
+                setApiProduct(null); // Ensure product is null on error
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchProduct();
             window.scrollTo(0, 0);
         }
-    }, [product]);
+    }, [id, API_BASE_URL, toast]);
 
-    if (!product) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
-                <div className="text-center">
-                    <h2 className="text-2xl font-display font-bold mb-4">Product not found</h2>
-                    <Button onClick={() => navigate('/shop')}>Back to Shop</Button>
-                </div>
-            </div>
-        );
-    }
+    // Derived State
+    const currentVariant = apiProduct?.variants.find(v => v.id === selectedVariantId) || apiProduct?.variants[0];
 
-    // Calculate dynamic price based on weight
-    const getPrice = () => {
-        let multiplier = 1;
-        if (selectedWeight === '30g') multiplier = 0.4;
-        if (selectedWeight === '200g') multiplier = 1.8;
-        return Math.round(product.price * multiplier);
+    // Update active image when variant changes
+    useEffect(() => {
+        if (currentVariant?.images && currentVariant.images.length > 0) {
+            setActiveImage(currentVariant.images[0].imageUrl);
+        } else if (apiProduct?.mainImage) {
+            setActiveImage(apiProduct.mainImage);
+        }
+    }, [selectedVariantId, apiProduct]);
+
+    // Fallback/Mapping
+    const currentPrice = currentVariant?.price || 0;
+    const currentOriginalPrice = currentVariant?.mrp;
+    const selectedWeight = currentVariant?.size || 'Standard';
+
+    // Collect all images to display: Variant images take precedence, then Product Main Image, then Product Gallery
+    const displayImages = [...(currentVariant?.images?.map(i => i.imageUrl) || [])].filter(Boolean) as string[];
+    // Remove duplicates
+    const uniqueImages = Array.from(new Set(displayImages));
+
+
+    // Cart Logic
+    // Find cart item by VARIANT ID
+    const cartItem = items.find(item => item.id === String(currentVariant?.id));
+    const quantityInCart = cartItem ? cartItem.quantity : 0;
+
+    // Helper to determine flavor color style (simplified mapping for now)
+    const getFlavorColor = (name: string): any => {
+        const lowerName = name.toLowerCase();
+        if (lowerName.includes('cream')) return 'cream-onion';
+        if (lowerName.includes('peri')) return 'peri-peri';
+        if (lowerName.includes('mint') || lowerName.includes('pudina')) return 'mint';
+        if (lowerName.includes('tandoori')) return 'tandoori';
+        if (lowerName.includes('cheese')) return 'gold';
+        return 'himalayan'; // Default
     };
-
-    const getOriginalPrice = () => {
-        if (!product.originalPrice) return null;
-        let multiplier = 1;
-        if (selectedWeight === '30g') multiplier = 0.4;
-        if (selectedWeight === '200g') multiplier = 1.8;
-        return Math.round(product.originalPrice * multiplier);
-    };
-
-    const currentPrice = getPrice();
-    const currentOriginalPrice = getOriginalPrice();
 
     const handleAddToCart = () => {
+        if (!apiProduct || !currentVariant) return;
+
         addToCart({
-            id: product.id,
-            name: product.name,
-            flavor: product.flavor,
+            id: String(currentVariant.id), // Using Variant ID
+            name: currentVariant.name || apiProduct.name, // Use Variant Name
+            flavor: currentVariant.name || apiProduct.name,
             price: currentPrice,
-            image: product.image,
-            flavorColor: product.flavorColor,
+            image: currentVariant.images?.[0]?.imageUrl || apiProduct.mainImage,
+            flavorColor: getFlavorColor(apiProduct.name),
             quantity: 1,
         });
         toast({
             title: "Added to cart",
-            description: `${product.name} (${selectedWeight}) added.`,
+            description: `${currentVariant.name || apiProduct.name} (${selectedWeight}) added.`,
         });
         setIsCartOpen(true);
     };
 
     const handleIncrement = () => {
+        if (!apiProduct || !currentVariant) return;
         addToCart({
-            id: product.id,
-            name: product.name,
-            flavor: product.flavor,
+            id: String(currentVariant.id),
+            name: currentVariant.name || apiProduct.name,
+            flavor: currentVariant.name || apiProduct.name,
             price: currentPrice,
-            image: product.image,
-            flavorColor: product.flavorColor,
+            image: currentVariant?.images?.[0]?.imageUrl || apiProduct.mainImage,
+            flavorColor: getFlavorColor(apiProduct.name),
             quantity: 1
         });
     };
 
     const handleDecrement = () => {
+        if (!apiProduct || !currentVariant) return;
         if (quantityInCart > 1) {
-            updateQuantity(product.id, quantityInCart - 1);
+            updateQuantity(String(currentVariant.id), quantityInCart - 1);
         } else {
-            removeFromCart(product.id);
+            removeFromCart(String(currentVariant.id));
         }
     };
 
     const handleBuyNow = () => {
         if (quantityInCart === 0) {
-            addToCart({
-                id: product.id,
-                name: product.name,
-                flavor: product.flavor,
-                price: currentPrice,
-                image: product.image,
-                flavorColor: product.flavorColor,
-                quantity: 1,
-            });
+            handleAddToCart();
         }
         navigate('/checkout');
     };
@@ -133,56 +224,83 @@ const ProductDetailPage = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+            </div>
+        );
+    }
+
+    if (!apiProduct) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="text-center">
+                    <h2 className="text-2xl font-display font-bold mb-4">Product not found</h2>
+                    <Button onClick={() => navigate('/shop')}>Back to Shop</Button>
+                </div>
+            </div>
+        );
+    }
+
+    // Hardcoded related products for now as API doesn't return them yet
+    // const relatedProducts = products.filter((p) => String(p.categoryId) === String(apiProduct.categoryId) && p.id !== String(apiProduct.id)).slice(0, 4);
+
+
     return (
         <>
             <Helmet>
-                <title>{product.name} | Aurabites</title>
-                <meta name="description" content={product.description} />
+                <title>{currentVariant?.name || apiProduct.name} | Aurabites</title>
+                <meta name="description" content={apiProduct.shortDescription} />
             </Helmet>
 
             <div className="min-h-screen bg-background">
                 <Navbar />
 
                 <main className="container mx-auto px-4 py-8 pt-24">
-                    {/* Breadcrumb - simplified */}
+                    {/* Breadcrumb */}
                     <div className="flex items-center text-sm text-muted-foreground mb-8">
                         <span className="hover:text-primary cursor-pointer" onClick={() => navigate('/')}>Home</span>
                         <span className="mx-2">/</span>
                         <span className="hover:text-primary cursor-pointer" onClick={() => navigate('/shop')}>Shop</span>
                         <span className="mx-2">/</span>
-                        <span className="text-foreground font-medium">{product.name}</span>
+                        <span className="text-foreground font-medium">{apiProduct.name}</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 mb-16">
                         {/* Left Column: Images */}
                         <div className="space-y-4">
-                            <div
-                                className={`relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-white to-gray-50 border border-border shadow-soft group`}
-                            >
+                            <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-white to-gray-50 border border-border shadow-soft group">
                                 <img
                                     src={activeImage}
-                                    alt={product.name}
+                                    alt={apiProduct.name}
                                     className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-110"
                                 />
 
                                 {/* Floating Badges */}
                                 <div className="absolute top-4 left-4 flex flex-col gap-2">
-                                    {product.isBestseller && (
+                                    {currentVariant?.productVariantMktStatus === 'BEST_SELLER' && (
                                         <Badge className="bg-orange-500 hover:bg-orange-600">Bestseller</Badge>
                                     )}
-                                    {product.isNew && (
+                                    {currentVariant?.productVariantMktStatus === 'NEW_LAUNCH' && (
                                         <Badge className="bg-green-500 hover:bg-green-600">New Launch</Badge>
+                                    )}
+                                    {currentVariant?.productVariantMktStatus === 'FEATURED' && (
+                                        <Badge className="bg-pink-500 hover:bg-pink-600">Featured</Badge>
+                                    )}
+                                    {currentVariant?.productVariantMktStatus === 'TRENDING' && (
+                                        <Badge className="bg-orange-500 hover:bg-orange-600">Trending</Badge>
                                     )}
                                 </div>
                             </div>
 
                             {/* Thumbnails */}
                             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                                {[product.image, product.image, product.image].map((img, i) => (
+                                {uniqueImages.map((img, i) => (
                                     <button
                                         key={i}
                                         onClick={() => setActiveImage(img)}
-                                        className={`relative w-24 h-24 flex-shrink-0 rounded-xl border-2 overflow-hidden bg-white ${activeImage === img && i === 0 ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-gray-200'
+                                        className={`relative w-24 h-24 flex-shrink-0 rounded-xl border-2 overflow-hidden bg-white ${activeImage === img ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-gray-200'
                                             }`}
                                     >
                                         <img src={img} alt={`View ${i + 1}`} className="w-full h-full object-contain p-2" />
@@ -194,8 +312,8 @@ const ProductDetailPage = () => {
                         {/* Right Column: Product Info */}
                         <div className="flex flex-col">
                             <div className="mb-6">
-                                <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">{product.name}</h1>
-                                <p className="text-lg text-muted-foreground mb-4">Light. Crunchy. Guilt-Free.</p>
+                                <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">{currentVariant?.name || apiProduct.name}</h1>
+                                <p className="text-lg text-muted-foreground mb-4">{apiProduct.shortDescription}</p>
 
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className="flex items-center text-yellow-400">
@@ -204,7 +322,7 @@ const ProductDetailPage = () => {
                                         <Star className="fill-current w-5 h-5" />
                                         <Star className="fill-current w-5 h-5" />
                                         <Star className="fill-current w-5 h-5 text-gray-300" />
-                                        <span className="text-foreground font-semibold ml-2 text-sm">4.8</span>
+                                        <span className="text-foreground font-semibold ml-2 text-sm">{currentVariant?.rating || '4.8'}</span>
                                     </div>
                                     <span className="text-muted-foreground text-sm">|</span>
                                     {/* <span className="text-primary text-sm font-medium hover:underline cursor-pointer">128 Reviews</span> */}
@@ -212,10 +330,10 @@ const ProductDetailPage = () => {
 
                                 <div className="flex items-baseline gap-3">
                                     <span className="text-3xl font-display font-bold text-primary">₹{currentPrice}</span>
-                                    {currentOriginalPrice && (
+                                    {currentOriginalPrice && currentOriginalPrice > currentPrice && (
                                         <span className="text-lg text-muted-foreground line-through decoration-red-500/50">₹{currentOriginalPrice}</span>
                                     )}
-                                    {currentOriginalPrice && (
+                                    {currentOriginalPrice && currentOriginalPrice > currentPrice && (
                                         <Badge variant="secondary" className="text-green-700 bg-green-100">
                                             {Math.round(((currentOriginalPrice - currentPrice) / currentOriginalPrice) * 100)}% OFF
                                         </Badge>
@@ -227,32 +345,16 @@ const ProductDetailPage = () => {
                             <Separator className="mb-6" />
 
                             {/* Flavor Selection */}
-                            {/* <div className="mb-6">
-                                <label className="text-sm font-medium text-foreground mb-3 block">Select Flavor</label>
-                                <div className="flex flex-wrap gap-3">
-                                    {products.map((p) => (
-                                        <button
-                                            key={p.id}
-                                            onClick={() => navigate(`/product/${p.id}`)}
-                                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${p.id === product.id
-                                                ? 'bg-primary text-white shadow-lg shadow-primary/25 scale-105'
-                                                : 'bg-white border border-input text-foreground hover:bg-gray-50'
-                                                }`}
-                                        >
-                                            {p.flavor}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div> */}
+                            {/* Removed as flavors are part of product name, not separate selection */}
 
-                            {/* Weight Selection */}
+                            {/* Weight/Variant Selection */}
                             <div className="mb-6">
                                 <label className="text-sm font-medium text-foreground mb-3 block">Pack Weight</label>
                                 <div className="flex gap-4">
-                                    {['30g', '100g', '200g'].map((weight) => (
+                                    {apiProduct.variants.map((variant) => (
                                         <label
-                                            key={weight}
-                                            className={`relative flex items-center justify-center px-4 py-3 rounded-xl border-2 cursor-pointer transition-all ${selectedWeight === weight
+                                            key={variant.id}
+                                            className={`relative flex items-center justify-center px-4 py-3 rounded-xl border-2 cursor-pointer transition-all ${selectedVariantId === variant.id
                                                 ? 'border-primary bg-primary/5 text-primary'
                                                 : 'border-input hover:border-gray-300'
                                                 }`}
@@ -261,10 +363,10 @@ const ProductDetailPage = () => {
                                                 type="radio"
                                                 name="weight"
                                                 className="sr-only"
-                                                checked={selectedWeight === weight}
-                                                onChange={() => setSelectedWeight(weight)}
+                                                checked={selectedVariantId === variant.id}
+                                                onChange={() => setSelectedVariantId(variant.id)}
                                             />
-                                            <span className="font-medium">{weight}</span>
+                                            <span className="font-medium">{variant.size}  ({variant.productType.toLowerCase()})</span>
                                         </label>
                                     ))}
                                 </div>
@@ -381,11 +483,7 @@ const ProductDetailPage = () => {
                             </TabsList>
 
                             <TabsContent value="description" className="animate-fade-in space-y-4 text-muted-foreground leading-relaxed">
-                                <p>
-                                    Experience the perfect blend of health and taste with Aurabites {product.flavor} Makhana.
-                                    Sourced from the finest farms in Bihar, our fox nuts are roasted to perfection (never fried!)
-                                    and seasoned with premium {product.flavor} spices that will leave your taste buds craving more.
-                                </p>
+                                <p>{apiProduct.longDescription}</p>
                                 <div className="bg-secondary/20 p-6 rounded-xl my-6">
                                     <h3 className="font-display font-bold text-foreground mb-4">Why you'll love it:</h3>
                                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -399,39 +497,79 @@ const ProductDetailPage = () => {
 
                             <TabsContent value="nutrition" className="animate-fade-in">
                                 <div className="border rounded-xl p-6 max-w-md bg-white">
-                                    <h3 className="font-bold text-lg mb-4">Nutritional Facts (per 100g)</h3>
+                                    <h3 className="font-bold text-lg mb-4">Nutritional Facts (per {currentVariant?.nutritionInfo?.servingSize || '100g'})</h3>
                                     <div className="space-y-3">
-                                        <div className="flex justify-between border-b border-dashed pb-2">
-                                            <span>Energy</span>
-                                            <span className="font-medium">480 Kcal</span>
-                                        </div>
-                                        <div className="flex justify-between border-b border-dashed pb-2">
-                                            <span>Protein</span>
-                                            <span className="font-medium">10.5g</span>
-                                        </div>
-                                        <div className="flex justify-between border-b border-dashed pb-2">
-                                            <span>Carbohydrates</span>
-                                            <span className="font-medium">68g</span>
-                                        </div>
-                                        <div className="flex justify-between border-b border-dashed pb-2">
-                                            <span>Fat</span>
-                                            <span className="font-medium">20g</span>
-                                        </div>
-                                        <div className="flex justify-between pb-2">
-                                            <span>Sugar</span>
-                                            <span className="font-medium">2g</span>
-                                        </div>
+                                        {currentVariant?.nutritionInfo?.energyKcal !== undefined && (
+                                            <div className="flex justify-between border-b border-dashed pb-2">
+                                                <span>Energy</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.energyKcal} Kcal</span>
+                                            </div>
+                                        )}
+                                        {currentVariant?.nutritionInfo?.proteinG !== undefined && (
+                                            <div className="flex justify-between border-b border-dashed pb-2">
+                                                <span>Protein</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.proteinG}g</span>
+                                            </div>
+                                        )}
+                                        {currentVariant?.nutritionInfo?.carbohydrateG !== undefined && (
+                                            <div className="flex justify-between border-b border-dashed pb-2">
+                                                <span>Carbohydrates</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.carbohydrateG}g</span>
+                                            </div>
+                                        )}
+                                        {currentVariant?.nutritionInfo?.totalSugarG !== undefined && (
+                                            <div className="flex justify-between border-b border-dashed pb-2">
+                                                <span>Total Sugar</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.totalSugarG}g</span>
+                                            </div>
+                                        )}
+                                        {currentVariant?.nutritionInfo?.addedSugarG !== undefined && (
+                                            <div className="flex justify-between border-b border-dashed pb-2">
+                                                <span>Added Sugar</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.addedSugarG}g</span>
+                                            </div>
+                                        )}
+                                        {currentVariant?.nutritionInfo?.totalFatG !== undefined && (
+                                            <div className="flex justify-between border-b border-dashed pb-2">
+                                                <span>Total Fat</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.totalFatG}g</span>
+                                            </div>
+                                        )}
+                                        {currentVariant?.nutritionInfo?.saturatedFatG !== undefined && (
+                                            <div className="flex justify-between border-b border-dashed pb-2">
+                                                <span>Saturated Fat</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.saturatedFatG}g</span>
+                                            </div>
+                                        )}
+                                        {currentVariant?.nutritionInfo?.transFatG !== undefined && (
+                                            <div className="flex justify-between border-b border-dashed pb-2">
+                                                <span>Trans Fat</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.transFatG}g</span>
+                                            </div>
+                                        )}
+                                        {currentVariant?.nutritionInfo?.cholesterolMg !== undefined && (
+                                            <div className="flex justify-between border-b border-dashed pb-2">
+                                                <span>Cholesterol</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.cholesterolMg}mg</span>
+                                            </div>
+                                        )}
+                                        {currentVariant?.nutritionInfo?.sodiumMg !== undefined && (
+                                            <div className="flex justify-between pb-2">
+                                                <span>Sodium</span>
+                                                <span className="font-medium">{currentVariant.nutritionInfo.sodiumMg}mg</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </TabsContent>
 
                             <TabsContent value="ingredients" className="animate-fade-in text-muted-foreground">
-                                <p>Makhana (Fox Nuts), Edible Vegetable Oil (Rice Bran Oil), Spices & Condiments, Iodised Salt, Sugar, Acidity Regulators, Natural Flavors.</p>
+                                <p>{currentVariant?.nutritionInfo?.ingredients || " "}</p>
                                 <p className="mt-4 text-sm bg-yellow-50 text-yellow-800 p-3 rounded-lg border border-yellow-200 inline-block">Allergen Advice: Processed in a facility that handles nuts and seeds.</p>
                             </TabsContent>
 
                             <TabsContent value="storage" className="animate-fade-in text-muted-foreground">
-                                <p>Store in a cool, dry place. Once opened, store in an airtight container to retain crunchiness. Best consumed within 6 months of manufacture.</p>
+                                <p>{currentVariant?.storageInstructions || "Store in a cool, dry place. Once opened, store in an airtight container to retain crunchiness. Best consumed within 6 months of manufacture."}</p>
                             </TabsContent>
                         </Tabs>
                     </div>
@@ -466,7 +604,7 @@ const ProductDetailPage = () => {
                     <section>
                         <h2 className="font-display text-2xl font-bold mb-8">You might also like</h2>
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                            {relatedProducts.map((p) => (
+                            {/* {relatedProducts.map((p) => (
                                 <div key={p.id} className="group cursor-pointer" onClick={() => navigate(`/product/${p.id}`)}>
                                     <div className="rounded-2xl bg-secondary/20 p-6 mb-4 relative overflow-hidden">
                                         <img src={p.image} alt={p.name} className="w-full aspect-square object-contain transition-transform duration-500 group-hover:scale-110" />
@@ -475,7 +613,7 @@ const ProductDetailPage = () => {
                                     <p className="text-muted-foreground text-sm mb-2">{p.flavor}</p>
                                     <p className="font-bold text-primary">₹{p.price}</p>
                                 </div>
-                            ))}
+                            ))} */}
                         </div>
                     </section>
 
