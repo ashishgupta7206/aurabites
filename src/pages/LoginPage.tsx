@@ -11,11 +11,12 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name,setName]=useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login/signup logic here
-    console.log({ email, password, isLogin });
+    console.log({ email, password, isLogin,name });
   };
 
   return (
@@ -61,6 +62,24 @@ const LoginPage = () => {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
+                {
+                  !isLogin && 
+                     
+                <div>
+                  <Label htmlFor="email">Name</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter Your Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10 rounded-xl h-12"
+                  />
+                </div>
+                </div>
+                }
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
