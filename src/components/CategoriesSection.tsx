@@ -1,11 +1,73 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
-import { categories } from '@/data/products';
 import { CategoryCard } from './CategoryCard';
 import { Button } from '@/components/ui/button';
 
+interface ApiCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl: string;
+  parentId: number | null;
+  status: string;
+}
+
+interface CategoriesApiResponse {
+  success: boolean;
+  message: string;
+  data: ApiCategory[];
+}
+
 export const CategoriesSection = () => {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/categories/search/parent`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            page: 0,
+            size: 10,
+            sort: 'name,asc',
+          }),
+        });
+
+        if (response.ok) {
+          const data: CategoriesApiResponse = await response.json();
+          if (data.success && data.data) {
+            const mappedCategories = data.data.map((item, index) => {
+              const gradients = ['gradient-mint', 'gradient-teal', 'gradient-rust', 'gradient-gold'];
+              const icons = ['🌾', '🌿', '🌰'];
+              return {
+                id: String(item.id),
+                name: item.name,
+                slug: item.slug,
+                description: item.description,
+                icon: icons[index % icons.length],
+                gradient: gradients[index % gradients.length],
+                comingSoon: item.status !== 'ACTIVE',
+              };
+            });
+            setCategories(mappedCategories);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching categories", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, [API_BASE_URL]);
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: false,
@@ -40,6 +102,12 @@ export const CategoriesSection = () => {
       emblaApi.off('reInit', onSelect);
     };
   }, [emblaApi, onSelect]);
+
+  if (loading) {
+    return <div className="py-20 text-center">Loading Categories...</div>
+  }
+
+  if (categories.length === 0) return null;
 
   return (
     <section className="py-16 md:py-24 bg-secondary/30">
