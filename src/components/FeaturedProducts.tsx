@@ -64,7 +64,7 @@ export const FeaturedProducts = () => {
           {featured.map((product, index) => (
             <div
               key={product.id}
-              className="min-w-[220px] md:min-w-[260px] flex-shrink-0 animate-fade-in"
+              className="min-w-[180px] md:min-w-[200px] flex-shrink-0 animate-fade-in"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <ProductCard product={product} />
