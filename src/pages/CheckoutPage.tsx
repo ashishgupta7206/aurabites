@@ -258,7 +258,7 @@ const CheckoutPage = () => {
                         <img src={item.image} alt={item.name} className="w-10 h-10 object-contain" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <Link to={`/product/${item.id}`}> <p className="font-medium text-sm truncate">{item.flavor}</p></Link>
+                        <Link to={`/product/${item.id}`}> <p className="font-medium text-sm ">{item.name}</p></Link>
                         <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                       </div>
                       <p className="font-semibold text-sm">₹{item.price * item.quantity}</p>
