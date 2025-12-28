@@ -1,11 +1,3 @@
-import productCreamOnion from '@/assets/product-cream-onion.png';
-import productPeriPeri from '@/assets/product-peri-peri.png';
-import productPinkSalt from '@/assets/product-pink-salt.png';
-import productCheese from '@/assets/product-cheese.png';
-import productTandoori from '@/assets/product-tandoori.png';
-import productMint from '@/assets/product-mint.png';
-import productSalted from '@/assets/product-salted.png';
-import productBbq from '@/assets/product-bbq.png';
 
 export interface Product {
   id: string;
@@ -24,75 +16,6 @@ export interface Product {
   isBestseller?: boolean;
 }
 
-export const products: Product[] = [
-  {
-    id: 'p1',
-    productId: 1,
-    name: 'Aurabites Cream & Onion',
-    flavor: 'Cream & Onion',
-    description: 'Creamy, tangy, and irresistibly crunchy',
-    price: 149,
-    originalPrice: 179,
-    protein: '10g',
-    categoryId: 'c1',
-    flavorColor: 'cream-onion',
-    image: productCreamOnion,
-    isBestseller: true,
-  },
-  {
-    id: 'p2',
-    productId: 2,
-    name: 'Aurabites Peri Peri',
-    flavor: 'Peri Peri',
-    description: 'Spicy, smoky, and full of zing',
-    price: 149,
-    originalPrice: 179,
-    protein: '10g',
-    categoryId: 'c1',
-    flavorColor: 'peri-peri',
-    image: productPeriPeri,
-    isBestseller: true,
-  },
-  {
-    id: 'p3',
-    productId: 3,
-    name: 'Aurabites Himalayan Pink Salt',
-    flavor: 'Himalayan Pink Salt',
-    description: 'Pure, simple, and perfectly salted',
-    price: 139,
-    protein: '10g',
-    categoryId: 'c1',
-    flavorColor: 'himalayan',
-    image: productPinkSalt,
-  },
-  {
-    id: 'p4',
-    productId: 4,
-    name: 'Aurabites Cheese Blast',
-    flavor: 'Cheese Blast',
-    description: 'Rich, cheesy, and utterly addictive',
-    price: 159,
-    originalPrice: 189,
-    protein: '10g',
-    categoryId: 'c1',
-    flavorColor: 'gold',
-    image: productCheese,
-    isNew: true,
-  },
-  {
-    id: 'p5',
-    productId: 5,
-    name: 'Aurabites Tandoori Masala',
-    flavor: 'Tandoori Masala',
-    description: 'Smoky, spicy, and authentically Indian',
-    price: 149,
-    protein: '10g',
-    categoryId: 'c1',
-    flavorColor: 'tandoori',
-    image: productTandoori,
-    isBestseller: true,
-  }
-];
 
 export interface Category {
   id: string;
@@ -104,34 +27,6 @@ export interface Category {
   comingSoon?: boolean;
 }
 
-export const categories: Category[] = [
-  {
-    id: 'c1',
-    name: 'Roasted Makhana',
-    slug: 'roasted',
-    description: 'Crunchy, flavorful, guilt-free snacking',
-    icon: '🌾',
-    gradient: 'gradient-mint',
-  },
-  {
-    id: 'c2',
-    name: 'Raw Makhana',
-    slug: 'raw',
-    description: 'Pure, unprocessed fox nuts',
-    icon: '🌿',
-    gradient: 'gradient-teal',
-    comingSoon: true,
-  },
-  {
-    id: 'c3',
-    name: 'Premium Dry Fruits',
-    slug: 'dryfruits',
-    description: 'Cashews, almonds & dehydrated treats',
-    icon: '🥜',
-    gradient: 'gradient-rust',
-    comingSoon: true,
-  },
-];
 
 export interface Review {
   id: string;
