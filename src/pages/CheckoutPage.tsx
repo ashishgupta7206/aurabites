@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, MapPin, Phone, User, CreditCard, Truck, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, User, CreditCard, Truck, CheckCircle, Cookie } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,12 +9,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
+import Cookies from 'js-cookie';
 
 const CheckoutPage = () => {
-  const { items, totalPrice, clearCart } = useCart();
+  const { items, clearCart } = useCart();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Preview state
+  const [preview, setPreview] = useState(null);
+  const [isPreviewing, setIsPreviewing] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -25,16 +30,87 @@ const CheckoutPage = () => {
     pincode: '',
   });
 
+  const baseUrl = import.meta.env?.VITE_API_BASE_URL;
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  
+
+  const fetchPreview = async () => {
+    if (!items || items.length === 0) return;
+    setIsPreviewing(true);
+    try {
+      const body = {
+        items: items.map(i => ({
+          productVariantId: i.id,
+          quantity: i.quantity,
+        })),
+      };
+
+      const token = Cookies.get('token'); 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${baseUrl}/orders/preview`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data?.success) {
+        setPreview(data.data);
+
+        // If backend returned an address, prefill form
+        if (data.data.address) {
+          setFormData(prev => ({
+            ...prev,
+            name: data.data.address.fullName ?? prev.name,
+            phone: data.data.address.mobile ?? prev.phone,
+            address: data.data.address.addressLine1 ?? prev.address,
+            city: data.data.address.city ?? prev.city,
+            pincode: data.data.address.pincode ?? prev.pincode,
+          }));
+        }
+      } else {
+        toast({
+          title: 'Failed to generate order preview',
+          description: data?.message ?? 'Please try again.',
+        });
+      }
+    } catch (err) {
+      toast({
+        title: 'Network error',
+        description: 'Unable to fetch order preview.',
+      });
+      navigate('/shop');
+    } finally {
+      setIsPreviewing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate order processing
+    // ensure preview is up-to-date before placing order
+    if (!preview) {
+      await fetchPreview();
+    }
+
+    // Simulate order processing (replace with real create-order call)
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     toast({
@@ -62,6 +138,9 @@ const CheckoutPage = () => {
     );
   }
 
+  const displayTotal = preview?.payableAmount;
+  const previewItems = preview?.items ?? [];
+
   return (
     <>
       <Helmet>
@@ -86,7 +165,7 @@ const CheckoutPage = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Form Section */}
             <div className="lg:col-span-2 space-y-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form id="checkout-form" onSubmit={handleSubmit} className="space-y-6">
                 {/* Delivery Details */}
                 <div className="bg-card rounded-2xl border border-border p-6">
                   <div className="flex items-center gap-3 mb-6">
@@ -226,10 +305,10 @@ const CheckoutPage = () => {
                 <div className="lg:hidden">
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isPreviewing}
                     className="w-full rounded-full py-6 text-base font-semibold"
                   >
-                    {isSubmitting ? (
+                    {(isSubmitting || isPreviewing) ? (
                       <span className="flex items-center gap-2">
                         <span className="animate-spin">⏳</span>
                         Processing...
@@ -237,7 +316,7 @@ const CheckoutPage = () => {
                     ) : (
                       <span className="flex items-center gap-2">
                         <CheckCircle className="w-5 h-5" />
-                        Place Order • ₹{totalPrice}
+                        Place Order • ₹{displayTotal}
                       </span>
                     )}
                   </Button>
@@ -252,16 +331,16 @@ const CheckoutPage = () => {
 
                 {/* Items */}
                 <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
-                  {items.map(item => (
-                    <div key={item.id} className="flex gap-3">
+                  {previewItems.map((item: any, idx: number) => (
+                    <div key={item.variantId ?? item.id ?? idx} className="flex gap-3">
                       <div className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center flex-shrink-0">
-                        <img src={item.image} alt={item.name} className="w-10 h-10 object-contain" />
+                        <img src={item.variantImage} alt={item.productName ?? item.name} className="w-10 h-10 object-contain" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <Link to={`/product/${item.id}`}> <p className="font-medium text-sm ">{item.name}</p></Link>
+                        <Link to={`/product/${item.productId}`}> <p className="font-medium text-sm ">{item.productVariantName}</p></Link>
                         <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                       </div>
-                      <p className="font-semibold text-sm">₹{item.price * item.quantity}</p>
+                      <p className="font-semibold text-sm">₹{item.total ?? (item.priceAtTime * item.quantity)}</p>
                     </div>
                   ))}
                 </div>
@@ -269,22 +348,22 @@ const CheckoutPage = () => {
                 {/* Delivery Badge */}
                 <div className="flex items-center gap-2 p-3 bg-accent/10 rounded-xl mb-4">
                   <Truck className="w-5 h-5 text-accent" />
-                  <span className="text-sm font-medium text-accent">Free Delivery</span>
+                  <span className="text-sm font-medium text-accent">{preview ? (preview.deliveryCharge ? `Delivery ₹${preview.deliveryCharge}` : 'Free Delivery') : 'Free Delivery'}</span>
                 </div>
 
                 {/* Totals */}
                 <div className="space-y-2 border-t border-border pt-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>₹{totalPrice}</span>
+                    <span>₹{preview?.totalAmount}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Delivery</span>
-                    <span className="text-accent">FREE</span>
+                    <span className="text-accent">{preview ? (preview.deliveryCharge ? `₹${preview.deliveryCharge}` : 'FREE') : 'FREE'}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
                     <span>Total</span>
-                    <span className="text-primary">₹{totalPrice}</span>
+                    <span className="text-primary">₹{displayTotal}</span>
                   </div>
                 </div>
 
@@ -293,11 +372,11 @@ const CheckoutPage = () => {
                   <Button
                     type="submit"
                     form="checkout-form"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isPreviewing}
                     className="w-full rounded-full py-6 text-base font-semibold"
                     onClick={handleSubmit}
                   >
-                    {isSubmitting ? (
+                    {(isSubmitting || isPreviewing) ? (
                       <span className="flex items-center gap-2">
                         <span className="animate-spin">⏳</span>
                         Processing...
@@ -305,7 +384,7 @@ const CheckoutPage = () => {
                     ) : (
                       <span className="flex items-center gap-2">
                         <CheckCircle className="w-5 h-5" />
-                        Place Order
+                        Place Order • ₹{displayTotal}
                       </span>
                     )}
                   </Button>
