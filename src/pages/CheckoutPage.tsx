@@ -37,6 +37,41 @@ const CheckoutPage = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const openRazorpay = (payment: any) => {
+  const options = {
+    key: payment.providerKey,                // PUBLIC key
+    amount: payment.amount * 100,             // paise
+    currency: payment.currency,
+    order_id: payment.paymentReferenceId,     // Razorpay order_id
+
+    name: "Aurabites",
+    description: "Order Payment",
+
+    prefill: {
+      name: formData.name,
+      contact: formData.phone,
+      email: formData.email,
+    },
+
+    theme: {
+      color: "#7c3aed", // violet (optional)
+    },
+
+    handler: function () {
+      // ❌ DO NOTHING HERE
+      // ✅ Webhook will handle success
+      toast({
+        title: "Payment initiated",
+        description: "Confirming payment...",
+      });
+    },
+  };
+
+  // @ts-ignore
+  const rzp = new window.Razorpay(options);
+  rzp.open();
+  };
+
   
 
   const fetchPreview = async () => {
@@ -102,26 +137,58 @@ const CheckoutPage = () => {
   }, [items]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  e.preventDefault();
 
-    // ensure preview is up-to-date before placing order
-    if (!preview) {
-      await fetchPreview();
-    }
-
-    // Simulate order processing (replace with real create-order call)
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
+  if (paymentMethod === 'cod') {
     toast({
-      title: "Order Placed Successfully! 🎉",
-      description: "You'll receive a confirmation shortly.",
+      title: "Order placed (COD)",
+      description: "You will pay on delivery",
     });
-
     clearCart();
     navigate('/');
+    return;
+  }
+
+  // ONLINE PAYMENT FLOW
+  try {
+    setIsSubmitting(true);
+
+    const token = Cookies.get('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${baseUrl}/payments/create`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        orderId: preview.orderId,     // from preview
+        amount: preview.payableAmount,
+        currency: "INR",
+        provider: "RAZORPAY",
+        method: "ONLINE",
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || "Payment init failed");
+    }
+
+    // 🔥 OPEN RAZORPAY
+    openRazorpay(data.data);
+
+  } catch (err: any) {
+    toast({
+      title: "Payment failed",
+      description: err.message || "Please try again",
+    });
+  } finally {
     setIsSubmitting(false);
-  };
+  }
+};
 
   if (items.length === 0) {
     return (
