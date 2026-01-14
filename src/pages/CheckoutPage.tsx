@@ -1,20 +1,30 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, MapPin, Phone, User, CreditCard, Truck, CheckCircle, Cookie } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { toast } from '@/hooks/use-toast';
-import Cookies from 'js-cookie';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import {
+  ArrowLeft,
+  MapPin,
+  Phone,
+  User,
+  CreditCard,
+  Truck,
+  CheckCircle,
+  Cookie,
+} from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "@/hooks/use-toast";
+import Cookies from "js-cookie";
+import { add } from "date-fns";
 
 const CheckoutPage = () => {
   const { items, clearCart } = useCart();
   const navigate = useNavigate();
-  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [paymentMethod, setPaymentMethod] = useState("online");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Preview state
@@ -22,78 +32,78 @@ const CheckoutPage = () => {
   const [isPreviewing, setIsPreviewing] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    city: '',
-    pincode: '',
+    name: "",
+    phone: "",
+    email: "",
+    address: "",
+    city: "",
+    pincode: "",
   });
 
   const baseUrl = import.meta.env?.VITE_API_BASE_URL;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const openRazorpay = (payment: any) => {
-  const options = {
-    key: payment.providerKey,                // PUBLIC key
-    amount: payment.amount * 100,             // paise
-    currency: payment.currency,
-    order_id: payment.paymentReferenceId,     // Razorpay order_id
+    const options = {
+      key: payment.providerKey, // PUBLIC key
+      amount: payment.amount * 100, // paise
+      currency: payment.currency,
+      order_id: payment.paymentReferenceId, // Razorpay order_id
 
-    name: "Aurabites",
-    description: "Order Payment",
+      name: "Aurabites",
+      description: "Order Payment",
 
-    prefill: {
-      name: formData.name,
-      contact: formData.phone,
-      email: formData.email,
-    },
+      prefill: {
+        name: formData.name,
+        contact: formData.phone,
+        email: formData.email,
+      },
 
-    theme: {
-      color: "#7c3aed", // violet (optional)
-    },
+      theme: {
+        color: "#7c3aed", // violet (optional)
+      },
 
-    handler: function () {
-      // ❌ DO NOTHING HERE
-      // ✅ Webhook will handle success
-      toast({
-        title: "Payment initiated",
-        description: "Confirming payment...",
-      });
-    },
+      handler: function () {
+        // ❌ DO NOTHING HERE
+        // ✅ Webhook will handle success
+        toast({
+          title: "Payment initiated",
+          description: "Confirming payment...",
+        });
+      },
+    };
+
+    // @ts-ignore
+    const rzp = new window.Razorpay(options);
+    rzp.open();
   };
-
-  // @ts-ignore
-  const rzp = new window.Razorpay(options);
-  rzp.open();
-  };
-
-  
 
   const fetchPreview = async () => {
     if (!items || items.length === 0) return;
     setIsPreviewing(true);
     try {
       const body = {
-        items: items.map(i => ({
+        items: items.map((i) => ({
           productVariantId: i.id,
           quantity: i.quantity,
         })),
       };
 
-      const token = Cookies.get('token'); 
+      const token = Cookies.get("token");
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        "Content-Type": "application/json",
+        Accept: "application/json",
       };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const res = await fetch(`${baseUrl}/orders/preview`, {
-        method: 'POST',
+        method: "POST",
         headers,
         body: JSON.stringify(body),
       });
@@ -105,7 +115,7 @@ const CheckoutPage = () => {
 
         // If backend returned an address, prefill form
         if (data.data.address) {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
             name: data.data.address.fullName ?? prev.name,
             phone: data.data.address.mobile ?? prev.phone,
@@ -116,16 +126,16 @@ const CheckoutPage = () => {
         }
       } else {
         toast({
-          title: 'Failed to generate order preview',
-          description: data?.message ?? 'Please try again.',
+          title: "Failed to generate order preview",
+          description: data?.message ?? "Please try again.",
         });
       }
     } catch (err) {
       toast({
-        title: 'Network error',
-        description: 'Unable to fetch order preview.',
+        title: "Network error",
+        description: "Unable to fetch order preview.",
       });
-      navigate('/shop');
+      navigate("/shop");
     } finally {
       setIsPreviewing(false);
     }
@@ -137,66 +147,104 @@ const CheckoutPage = () => {
   }, [items]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (paymentMethod === 'cod') {
-    toast({
-      title: "Order placed (COD)",
-      description: "You will pay on delivery",
-    });
-    clearCart();
-    navigate('/');
-    return;
-  }
-
-  // ONLINE PAYMENT FLOW
-  try {
-    setIsSubmitting(true);
-
-    const token = Cookies.get('token');
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
-    const res = await fetch(`${baseUrl}/payments/create`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        orderId: preview.orderId,     // from preview
-        amount: preview.payableAmount,
-        currency: "INR",
-        provider: "RAZORPAY",
-        method: "ONLINE",
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.message || "Payment init failed");
+    if (Cookies.get("token") === null) {
+      toast({
+        title: "Not logged in",
+        description: "Please log in to place an order",
+      });
+      navigate("/login");
+      return;
     }
 
-    // 🔥 OPEN RAZORPAY
-    openRazorpay(data.data);
+    if (paymentMethod === "cod") {
+      toast({
+        title: "Order placed (COD)",
+        description: "You will pay on delivery",
+      });
+      clearCart();
+      navigate("/");
+      return;
+    }
 
-  } catch (err: any) {
-    toast({
-      title: "Payment failed",
-      description: err.message || "Please try again",
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+    // ONLINE PAYMENT FLOW
+    try {
+      setIsSubmitting(true);
+
+      const token = Cookies.get("token");
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const post_order = await fetch(`${baseUrl}/orders/create`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          address: {
+            fullName: formData.name,
+            mobile: formData.phone,
+            pincode: formData.pincode,
+            city: formData.city,
+            // state : formData.s
+            addressLine1: formData.address,
+          },
+          emailId: formData.email,
+          items : items.map((i) => ({
+            productVariantId: i.id,
+            quantity: i.quantity,
+          }))
+        }),
+      });
+
+      const order_data = await post_order.json();
+
+      if (!post_order.ok || !order_data.success) {
+        throw new Error(order_data.message || "Order creation failed");
+      }
+
+      const res = await fetch(`${baseUrl}/payments/create`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          orderId: order_data?.data?.id, // from preview
+          amount: order_data?.data.payableAmount,
+          currency: "INR",
+          provider: "RAZORPAY",
+          method: "ONLINE",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Payment init failed");
+      }
+
+      // 🔥 OPEN RAZORPAY
+      openRazorpay(data.data);
+    } catch (err: any) {
+      toast({
+        title: "Payment failed",
+        description: err.message || "Please try again",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="text-center">
           <div className="text-6xl mb-4">🛒</div>
-          <h1 className="font-display text-2xl font-bold mb-2">Your cart is empty</h1>
-          <p className="text-muted-foreground mb-6">Add some delicious makhana to checkout!</p>
+          <h1 className="font-display text-2xl font-bold mb-2">
+            Your cart is empty
+          </h1>
+          <p className="text-muted-foreground mb-6">
+            Add some delicious makhana to checkout!
+          </p>
           <Link to="/">
             <Button className="rounded-full">Start Shopping</Button>
           </Link>
@@ -223,7 +271,9 @@ const CheckoutPage = () => {
             </Link>
             <div className="flex items-center gap-2">
               <span className="text-xl">🌸</span>
-              <span className="font-display font-bold text-lg text-primary">Checkout</span>
+              <span className="font-display font-bold text-lg text-primary">
+                Checkout
+              </span>
             </div>
           </div>
         </header>
@@ -232,7 +282,11 @@ const CheckoutPage = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Form Section */}
             <div className="lg:col-span-2 space-y-6">
-              <form id="checkout-form" onSubmit={handleSubmit} className="space-y-6">
+              <form
+                id="checkout-form"
+                onSubmit={handleSubmit}
+                className="space-y-6"
+              >
                 {/* Delivery Details */}
                 <div className="bg-card rounded-2xl border border-border p-6">
                   <div className="flex items-center gap-3 mb-6">
@@ -240,8 +294,12 @@ const CheckoutPage = () => {
                       <MapPin className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h2 className="font-display font-bold text-lg">Delivery Address</h2>
-                      <p className="text-sm text-muted-foreground">Where should we deliver?</p>
+                      <h2 className="font-display font-bold text-lg">
+                        Delivery Address
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        Where should we deliver?
+                      </p>
                     </div>
                   </div>
 
@@ -342,26 +400,50 @@ const CheckoutPage = () => {
                       <CreditCard className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h2 className="font-display font-bold text-lg">Payment Method</h2>
-                      <p className="text-sm text-muted-foreground">How would you like to pay?</p>
+                      <h2 className="font-display font-bold text-lg">
+                        Payment Method
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        How would you like to pay?
+                      </p>
                     </div>
                   </div>
 
-                  <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
-                    <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                  <RadioGroup
+                    value={paymentMethod}
+                    onValueChange={setPaymentMethod}
+                    className="space-y-3"
+                  >
+                    {/* <label
+                      className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        paymentMethod === "cod"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
                       <RadioGroupItem value="cod" id="cod" />
                       <div className="flex-1">
                         <p className="font-semibold">Cash on Delivery</p>
-                        <p className="text-sm text-muted-foreground">Pay when you receive</p>
+                        <p className="text-sm text-muted-foreground">
+                          Pay when you receive
+                        </p>
                       </div>
                       <span className="text-2xl">💵</span>
-                    </label>
+                    </label> */}
 
-                    <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'online' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                    <label
+                      className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        paymentMethod === "online"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
                       <RadioGroupItem value="online" id="online" />
                       <div className="flex-1">
                         <p className="font-semibold">Online Payment</p>
-                        <p className="text-sm text-muted-foreground">UPI, Cards, Net Banking</p>
+                        <p className="text-sm text-muted-foreground">
+                          UPI, Cards, Net Banking
+                        </p>
                       </div>
                       <span className="text-2xl">💳</span>
                     </label>
@@ -375,7 +457,7 @@ const CheckoutPage = () => {
                     disabled={isSubmitting || isPreviewing}
                     className="w-full rounded-full py-6 text-base font-semibold"
                   >
-                    {(isSubmitting || isPreviewing) ? (
+                    {isSubmitting || isPreviewing ? (
                       <span className="flex items-center gap-2">
                         <span className="animate-spin">⏳</span>
                         Processing...
@@ -394,20 +476,38 @@ const CheckoutPage = () => {
             {/* Order Summary - Sidebar */}
             <div className="lg:col-span-1">
               <div className="bg-card rounded-2xl border border-border p-6 sticky top-24">
-                <h2 className="font-display font-bold text-lg mb-4">Order Summary</h2>
+                <h2 className="font-display font-bold text-lg mb-4">
+                  Order Summary
+                </h2>
 
                 {/* Items */}
                 <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
                   {previewItems.map((item: any, idx: number) => (
-                    <div key={item.variantId ?? item.id ?? idx} className="flex gap-3">
+                    <div
+                      key={item.variantId ?? item.id ?? idx}
+                      className="flex gap-3"
+                    >
                       <div className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center flex-shrink-0">
-                        <img src={item.variantImage} alt={item.productName ?? item.name} className="w-10 h-10 object-contain" />
+                        <img
+                          src={item.variantImage}
+                          alt={item.productName ?? item.name}
+                          className="w-10 h-10 object-contain"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <Link to={`/product/${item.productId}`}> <p className="font-medium text-sm ">{item.productVariantName}</p></Link>
-                        <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                        <Link to={`/product/${item.productId}`}>
+                          {" "}
+                          <p className="font-medium text-sm ">
+                            {item.productVariantName}
+                          </p>
+                        </Link>
+                        <p className="text-xs text-muted-foreground">
+                          Qty: {item.quantity}
+                        </p>
                       </div>
-                      <p className="font-semibold text-sm">₹{item.total ?? (item.priceAtTime * item.quantity)}</p>
+                      <p className="font-semibold text-sm">
+                        ₹{item.total ?? item.priceAtTime * item.quantity}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -415,7 +515,13 @@ const CheckoutPage = () => {
                 {/* Delivery Badge */}
                 <div className="flex items-center gap-2 p-3 bg-accent/10 rounded-xl mb-4">
                   <Truck className="w-5 h-5 text-accent" />
-                  <span className="text-sm font-medium text-accent">{preview ? (preview.deliveryCharge ? `Delivery ₹${preview.deliveryCharge}` : 'Free Delivery') : 'Free Delivery'}</span>
+                  <span className="text-sm font-medium text-accent">
+                    {preview
+                      ? preview.deliveryCharge
+                        ? `Delivery ₹${preview.deliveryCharge}`
+                        : "Free Delivery"
+                      : "Free Delivery"}
+                  </span>
                 </div>
 
                 {/* Totals */}
@@ -426,7 +532,13 @@ const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Delivery</span>
-                    <span className="text-accent">{preview ? (preview.deliveryCharge ? `₹${preview.deliveryCharge}` : 'FREE') : 'FREE'}</span>
+                    <span className="text-accent">
+                      {preview
+                        ? preview.deliveryCharge
+                          ? `₹${preview.deliveryCharge}`
+                          : "FREE"
+                        : "FREE"}
+                    </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
                     <span>Total</span>
@@ -443,7 +555,7 @@ const CheckoutPage = () => {
                     className="w-full rounded-full py-6 text-base font-semibold"
                     onClick={handleSubmit}
                   >
-                    {(isSubmitting || isPreviewing) ? (
+                    {isSubmitting || isPreviewing ? (
                       <span className="flex items-center gap-2">
                         <span className="animate-spin">⏳</span>
                         Processing...
