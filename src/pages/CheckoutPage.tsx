@@ -9,7 +9,6 @@ import {
   CreditCard,
   Truck,
   CheckCircle,
-  Cookie,
 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 import Cookies from "js-cookie";
-import { add } from "date-fns";
 
 const CheckoutPage = () => {
   const { items, clearCart } = useCart();
@@ -28,7 +26,7 @@ const CheckoutPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Preview state
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState<any>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -49,12 +47,35 @@ const CheckoutPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const openRazorpay = (payment: any) => {
-    const options = {
-      key: payment.providerKey, // PUBLIC key
-      amount: payment.amount * 100, // paise
+  // ✅ Razorpay Open
+  const openRazorpay = (payment: any, orderId: number) => {
+    console.log("✅ openRazorpay called");
+    console.log("payment object:", payment);
+    console.log("orderId:", orderId);
+
+    if (!window?.Razorpay) {
+      toast({
+        title: "Razorpay not loaded",
+        description: "Please refresh and try again.",
+      });
+      console.error("❌ window.Razorpay is undefined. Script not loaded.");
+      return;
+    }
+
+    if (!payment?.paymentReferenceId) {
+      toast({
+        title: "Payment error",
+        description: "Missing Razorpay order_id from backend.",
+      });
+      console.error("❌ payment.paymentReferenceId missing:", payment);
+      return;
+    }
+
+    const options: any = {
+      key: payment.providerKey,
+      amount: Number(payment.amount) * 100, // rupees -> paise
       currency: payment.currency,
-      order_id: payment.paymentReferenceId, // Razorpay order_id
+      order_id: payment.paymentReferenceId, // MUST be Razorpay order id like order_xxx
 
       name: "Aurabites",
       description: "Order Payment",
@@ -65,28 +86,97 @@ const CheckoutPage = () => {
         email: formData.email,
       },
 
-      theme: {
-        color: "#7c3aed", // violet (optional)
+      theme: { color: "#7c3aed" },
+
+      // ✅ Runs ONLY on success payment
+      handler: async function (response: any) {
+        console.log("✅ HANDLER CALLED (Payment Success)");
+        console.log("Razorpay response:", response);
+
+        try {
+          toast({
+            title: "Payment Success 🎉",
+            description: "Verifying payment...",
+          });
+
+          const token = Cookies.get("token");
+
+          const verifyPayload = {
+            orderId: orderId,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          };
+
+          console.log("verifyPayload:", verifyPayload);
+
+          const verifyUrl = `${baseUrl}/payments/verify`;
+          console.log("verifyUrl:", verifyUrl);
+
+          const verifyRes = await fetch(verifyUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(verifyPayload),
+          });
+
+          const verifyData = await verifyRes.json();
+          console.log("verifyRes status:", verifyRes.status);
+          console.log("verifyData:", verifyData);
+
+          if (!verifyRes.ok || !verifyData?.success) {
+            throw new Error(verifyData?.message || "Payment verification failed");
+          }
+
+          toast({
+            title: "Order Confirmed ✅",
+            description: "Redirecting...",
+          });
+
+          clearCart();
+          navigate("/order-success");
+        } catch (err: any) {
+          console.error("❌ Verification failed:", err);
+          toast({
+            title: "Verification failed ❌",
+            description: err?.message || "Please contact support",
+          });
+        }
       },
 
-      handler: function () {
-        // ❌ DO NOTHING HERE
-        // ✅ Webhook will handle success
-        toast({
-          title: "Payment initiated",
-          description: "Confirming payment...",
-        });
+      // ✅ Runs if user closes popup without payment
+      modal: {
+        ondismiss: function () {
+          console.log("❌ Razorpay popup closed without payment");
+          toast({
+            title: "Payment cancelled",
+            description: "You closed the payment window.",
+          });
+        },
       },
     };
 
-    // @ts-ignore
-    const rzp = new window.Razorpay(options);
+    const rzp = new (window as any).Razorpay(options);
+
+    // ✅ Runs if payment failed
+    rzp.on("payment.failed", function (response: any) {
+      console.log("❌ Razorpay payment.failed:", response);
+      toast({
+        title: "Payment Failed ❌",
+        description: response?.error?.description || "Try again",
+      });
+    });
+
     rzp.open();
   };
 
+  // ✅ Preview API
   const fetchPreview = async () => {
     if (!items || items.length === 0) return;
     setIsPreviewing(true);
+
     try {
       const body = {
         items: items.map((i) => ({
@@ -113,8 +203,8 @@ const CheckoutPage = () => {
       if (res.ok && data?.success) {
         setPreview(data.data);
 
-        // If backend returned an address, prefill form
-        if (data.data.address) {
+        // Prefill address if backend returns
+        if (data?.data?.address) {
           setFormData((prev) => ({
             ...prev,
             name: data.data.address.fullName ?? prev.name,
@@ -146,10 +236,13 @@ const CheckoutPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
+  // ✅ Submit Checkout
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (Cookies.get("token") === null) {
+    const token = Cookies.get("token");
+
+    if (!token) {
       toast({
         title: "Not logged in",
         description: "Please log in to place an order",
@@ -168,16 +261,15 @@ const CheckoutPage = () => {
       return;
     }
 
-    // ONLINE PAYMENT FLOW
     try {
       setIsSubmitting(true);
 
-      const token = Cookies.get("token");
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
 
+      // 1) Create Order
       const post_order = await fetch(`${baseUrl}/orders/create`, {
         method: "POST",
         headers,
@@ -187,29 +279,37 @@ const CheckoutPage = () => {
             mobile: formData.phone,
             pincode: formData.pincode,
             city: formData.city,
-            // state : formData.s
             addressLine1: formData.address,
           },
           emailId: formData.email,
-          items : items.map((i) => ({
+          items: items.map((i) => ({
             productVariantId: i.id,
             quantity: i.quantity,
-          }))
+          })),
         }),
       });
 
       const order_data = await post_order.json();
+      console.log("order_data:", order_data);
 
-      if (!post_order.ok || !order_data.success) {
-        throw new Error(order_data.message || "Order creation failed");
+      if (!post_order.ok || !order_data?.success) {
+        throw new Error(order_data?.message || "Order creation failed");
       }
 
+      const createdOrderId = order_data?.data?.id;
+      const payableAmount = order_data?.data?.payableAmount;
+
+      if (!createdOrderId) {
+        throw new Error("Order ID missing from backend response");
+      }
+
+      // 2) Create Payment
       const res = await fetch(`${baseUrl}/payments/create`, {
         method: "POST",
         headers,
         body: JSON.stringify({
-          orderId: order_data?.data?.id, // from preview
-          amount: order_data?.data.payableAmount,
+          orderId: createdOrderId,
+          amount: payableAmount,
           currency: "INR",
           provider: "RAZORPAY",
           method: "ONLINE",
@@ -217,17 +317,19 @@ const CheckoutPage = () => {
       });
 
       const data = await res.json();
+      console.log("payment create response:", data);
 
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Payment init failed");
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.message || "Payment init failed");
       }
 
-      // 🔥 OPEN RAZORPAY
-      openRazorpay(data.data);
+      // 3) Open Razorpay
+      openRazorpay(data.data, createdOrderId);
     } catch (err: any) {
+      console.error("❌ Payment failed:", err);
       toast({
         title: "Payment failed",
-        description: err.message || "Please try again",
+        description: err?.message || "Please try again",
       });
     } finally {
       setIsSubmitting(false);
@@ -320,6 +422,7 @@ const CheckoutPage = () => {
                           />
                         </div>
                       </div>
+
                       <div className="space-y-2">
                         <Label htmlFor="phone">Phone Number *</Label>
                         <div className="relative">
@@ -377,6 +480,7 @@ const CheckoutPage = () => {
                           className="rounded-xl"
                         />
                       </div>
+
                       <div className="space-y-2">
                         <Label htmlFor="pincode">Pincode *</Label>
                         <Input
@@ -414,23 +518,6 @@ const CheckoutPage = () => {
                     onValueChange={setPaymentMethod}
                     className="space-y-3"
                   >
-                    {/* <label
-                      className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                        paymentMethod === "cod"
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <RadioGroupItem value="cod" id="cod" />
-                      <div className="flex-1">
-                        <p className="font-semibold">Cash on Delivery</p>
-                        <p className="text-sm text-muted-foreground">
-                          Pay when you receive
-                        </p>
-                      </div>
-                      <span className="text-2xl">💵</span>
-                    </label> */}
-
                     <label
                       className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         paymentMethod === "online"
@@ -473,14 +560,13 @@ const CheckoutPage = () => {
               </form>
             </div>
 
-            {/* Order Summary - Sidebar */}
+            {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-card rounded-2xl border border-border p-6 sticky top-24">
                 <h2 className="font-display font-bold text-lg mb-4">
                   Order Summary
                 </h2>
 
-                {/* Items */}
                 <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
                   {previewItems.map((item: any, idx: number) => (
                     <div
@@ -496,8 +582,7 @@ const CheckoutPage = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <Link to={`/product/${item.productId}`}>
-                          {" "}
-                          <p className="font-medium text-sm ">
+                          <p className="font-medium text-sm">
                             {item.productVariantName}
                           </p>
                         </Link>
@@ -512,7 +597,6 @@ const CheckoutPage = () => {
                   ))}
                 </div>
 
-                {/* Delivery Badge */}
                 <div className="flex items-center gap-2 p-3 bg-accent/10 rounded-xl mb-4">
                   <Truck className="w-5 h-5 text-accent" />
                   <span className="text-sm font-medium text-accent">
@@ -524,7 +608,6 @@ const CheckoutPage = () => {
                   </span>
                 </div>
 
-                {/* Totals */}
                 <div className="space-y-2 border-t border-border pt-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
@@ -546,14 +629,13 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
-                {/* Submit Button - Desktop */}
+                {/* ✅ Submit Button - Desktop (FIXED: NO onClick) */}
                 <div className="hidden lg:block mt-6">
                   <Button
                     type="submit"
                     form="checkout-form"
                     disabled={isSubmitting || isPreviewing}
                     className="w-full rounded-full py-6 text-base font-semibold"
-                    onClick={handleSubmit}
                   >
                     {isSubmitting || isPreviewing ? (
                       <span className="flex items-center gap-2">

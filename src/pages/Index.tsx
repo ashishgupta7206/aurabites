@@ -28,7 +28,7 @@ const Index = () => {
         </main>
         <Footer />
         <CartBar />
-        <CartDrawer />
+        <CartDrawer />                                                    
       </div>
     </>
   );
