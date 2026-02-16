@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/api': {
-        target: 'https://canvify-backend-2-production.up.railway.app',
+        target: 'http://ec2-3-109-89-244.ap-south-1.compute.amazonaws.com:8000',
         changeOrigin: true,
       },
     },
