@@ -18,6 +18,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 import Cookies from "js-cookie";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CheckoutPage = () => {
   const { items, clearCart } = useCart();
@@ -35,10 +42,23 @@ const CheckoutPage = () => {
     email: "",
     address: "",
     city: "",
+    state: "",
     pincode: "",
   });
 
   const baseUrl = import.meta.env?.VITE_API_BASE_URL;
+
+  const INDIAN_STATES = [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+    "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+    "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+    "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+    "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+    "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+  ];
+
+  const [statesList, setStatesList] = useState<any[]>(INDIAN_STATES);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -211,6 +231,7 @@ const CheckoutPage = () => {
             phone: data.data.address.mobile ?? prev.phone,
             address: data.data.address.addressLine1 ?? prev.address,
             city: data.data.address.city ?? prev.city,
+            state: data.data.address.state ?? prev.state,
             pincode: data.data.address.pincode ?? prev.pincode,
           }));
         }
@@ -240,16 +261,34 @@ const CheckoutPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = Cookies.get("token");
-
-    if (!token) {
+    if (formData.phone.length !== 10) {
       toast({
-        title: "Not logged in",
-        description: "Please log in to place an order",
+        title: "Invalid Phone Number",
+        description: "Please enter a valid 10-digit mobile number.",
+        variant: "destructive",
       });
-      navigate("/login");
       return;
     }
+
+    if (formData.pincode.length !== 6) {
+      toast({
+        title: "Invalid Pincode",
+        description: "Please enter a valid 6-digit pincode.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const token = Cookies.get("token");
+
+    // if (!token) {
+    //   toast({
+    //     title: "Not logged in",
+    //     description: "Please log in to place an order",
+    //   });
+    //   navigate("/login");
+    //   return;
+    // }
 
     if (paymentMethod === "cod") {
       toast({
@@ -279,6 +318,7 @@ const CheckoutPage = () => {
             mobile: formData.phone,
             pincode: formData.pincode,
             city: formData.city,
+            state: formData.state,
             addressLine1: formData.address,
           },
           emailId: formData.email,
@@ -433,7 +473,12 @@ const CheckoutPage = () => {
                             type="tel"
                             placeholder="9876543210"
                             value={formData.phone}
-                            onChange={handleInputChange}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, "");
+                              if (val.length <= 10) {
+                                setFormData((prev) => ({ ...prev, phone: val }));
+                              }
+                            }}
                             required
                             className="pl-10 rounded-xl"
                           />
@@ -467,7 +512,7 @@ const CheckoutPage = () => {
                       />
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="city">City *</Label>
                         <Input
@@ -482,13 +527,42 @@ const CheckoutPage = () => {
                       </div>
 
                       <div className="space-y-2">
+                        <Label htmlFor="state">State *</Label>
+                        <Select
+                          value={formData.state}
+                          onValueChange={(val) => setFormData(prev => ({ ...prev, state: val }))}
+                          required
+                        >
+                          <SelectTrigger className="rounded-xl">
+                            <SelectValue placeholder="Select State" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statesList.map((st: any, idx: number) => {
+                              const value = typeof st === 'string' ? st : (st._id || st.id || st.name || st.state || String(idx));
+                              const label = typeof st === 'string' ? st : (st.name || st.state || st.title || value);
+                              return (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
                         <Label htmlFor="pincode">Pincode *</Label>
                         <Input
                           id="pincode"
                           name="pincode"
                           placeholder="400001"
                           value={formData.pincode}
-                          onChange={handleInputChange}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            if (val.length <= 6) {
+                              setFormData((prev) => ({ ...prev, pincode: val }));
+                            }
+                          }}
                           required
                           className="rounded-xl"
                         />
@@ -519,11 +593,10 @@ const CheckoutPage = () => {
                     className="space-y-3"
                   >
                     <label
-                      className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                        paymentMethod === "online"
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      }`}
+                      className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === "online"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                        }`}
                     >
                       <RadioGroupItem value="online" id="online" />
                       <div className="flex-1">
