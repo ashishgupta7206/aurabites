@@ -156,13 +156,14 @@ const CheckoutPage = () => {
           });
 
           clearCart();
-          navigate("/order-success");
+          navigate(`/order-success?orderId=${orderId}`);
         } catch (err: any) {
           console.error("❌ Verification failed:", err);
           toast({
             title: "Verification failed ❌",
             description: err?.message || "Please contact support",
           });
+          navigate(`/order-failed?orderId=${orderId}`);
         }
       },
 
@@ -187,6 +188,7 @@ const CheckoutPage = () => {
         title: "Payment Failed ❌",
         description: response?.error?.description || "Try again",
       });
+      navigate(`/order-failed?orderId=${orderId}`);
     });
 
     rzp.open();
