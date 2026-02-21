@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut, Package } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -86,6 +86,13 @@ export const Navbar = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/orders" className="cursor-pointer w-full flex items-center">
+                    <Package className="mr-2 h-4 w-4" />
+                    <span>My Orders</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 focus:text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Logout</span>
@@ -138,15 +145,24 @@ export const Navbar = () => {
                 ))}
                 <hr className="my-2 border-border" />
                 {user ? (
-                  <button
-                    onClick={() => {
-                      logout();
-                      setIsMobileOpen(false);
-                    }}
-                    className="font-display font-semibold text-lg py-2 text-foreground/70 text-left"
-                  >
-                    Logout
-                  </button>
+                  <>
+                    <Link
+                      to="/orders"
+                      onClick={() => setIsMobileOpen(false)}
+                      className="font-display font-semibold text-lg py-2 transition-colors hover:text-primary text-foreground/70"
+                    >
+                      My Orders
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsMobileOpen(false);
+                      }}
+                      className="font-display font-semibold text-lg py-2 text-foreground/70 text-left"
+                    >
+                      Logout
+                    </button>
+                  </>
                 ) : (
                   <Link
                     to="/login"
