@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Package, ChevronRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,12 @@ const OrderHistoryPage = () => {
     //     }
     //     return undefined; // fallback handled by CSS if needed
     // };
+    const token = Cookies.get("token");
+    const navigate = useNavigate();
+    if (!token) {
+        navigate("/login");
+
+    }
 
     return (
         <div className="min-h-screen bg-background pt-24 pb-12">
