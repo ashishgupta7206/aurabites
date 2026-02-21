@@ -283,24 +283,7 @@ const CheckoutPage = () => {
 
     const token = Cookies.get("token");
 
-    // if (!token) {
-    //   toast({
-    //     title: "Not logged in",
-    //     description: "Please log in to place an order",
-    //   });
-    //   navigate("/login");
-    //   return;
-    // }
 
-    if (paymentMethod === "cod") {
-      toast({
-        title: "Order placed (COD)",
-        description: "You will pay on delivery",
-      });
-      clearCart();
-      navigate("/");
-      return;
-    }
 
     try {
       setIsSubmitting(true);
@@ -323,6 +306,7 @@ const CheckoutPage = () => {
             state: formData.state,
             addressLine1: formData.address,
           },
+          paymentMethod: paymentMethod === 'online' ? 'ONLINE' : 'COD',
           emailId: formData.email,
           items: items.map((i) => ({
             productVariantId: i.id,
@@ -332,7 +316,16 @@ const CheckoutPage = () => {
       });
 
       const order_data = await post_order.json();
-      console.log("order_data:", order_data);
+      if (paymentMethod === "cod") {
+        toast({
+          title: "Order placed (COD)",
+          description: "You will pay on delivery",
+        });
+        clearCart();
+        navigate(`/order-success?orderId=${order_data?.data?.id}`);
+        return;
+      }
+      // console.log("order_data:", order_data);
 
       if (!post_order.ok || !order_data?.success) {
         throw new Error(order_data?.message || "Order creation failed");
@@ -345,7 +338,18 @@ const CheckoutPage = () => {
         throw new Error("Order ID missing from backend response");
       }
 
-      // 2) Create Payment
+      // If COD, we are done
+      if (paymentMethod === "cod") {
+        toast({
+          title: "Order Confirmed ✅",
+          description: "You will pay on delivery",
+        });
+        clearCart();
+        navigate(`/order-success?orderId=${createdOrderId}`);
+        return;
+      }
+
+      // 2) Create Payment (for ONLINE)
       const res = await fetch(`${baseUrl}/payments/create`, {
         method: "POST",
         headers,
@@ -608,6 +612,22 @@ const CheckoutPage = () => {
                         </p>
                       </div>
                       <span className="text-2xl">💳</span>
+                    </label>
+
+                    <label
+                      className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === "cod"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                        }`}
+                    >
+                      <RadioGroupItem value="cod" id="cod" />
+                      <div className="flex-1">
+                        <p className="font-semibold">Cash on Delivery (COD)</p>
+                        <p className="text-sm text-muted-foreground">
+                          Pay when the order is delivered
+                        </p>
+                      </div>
+                      <span className="text-2xl">🚚</span>
                     </label>
                   </RadioGroup>
                 </div>
