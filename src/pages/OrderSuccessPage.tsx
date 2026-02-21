@@ -114,7 +114,7 @@ const OrderSuccessPage = () => {
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <p className="font-medium max-w-[200px] truncate">{item.productVariantName || item.productName}</p>
+                                                        <p className="font-medium max-w-[200px] ">{item.productVariantName || item.productName}</p>
                                                         <p className="text-muted-foreground">Qty: {item.quantity}</p>
                                                     </div>
                                                 </div>
