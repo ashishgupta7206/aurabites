@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import { CONTACT_INFO } from '@/lib/constants';
 
 export const Footer = () => {
   return (
@@ -17,7 +18,7 @@ export const Footer = () => {
             </p>
             <div className="flex gap-4">
               <a
-                href="https://instagram.com/aurabites"
+                href={CONTACT_INFO.INSTAGRAM}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
@@ -58,6 +59,7 @@ export const Footer = () => {
           <div>
             <h4 className="font-display font-bold text-lg mb-4">Policies</h4>
             <ul className="space-y-2">
+
               <li>
                 <Link to="/privacy" className="text-background/70 hover:text-background text-sm transition-colors">
                   Privacy Policy
@@ -75,7 +77,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link to="/refund" className="text-background/70 hover:text-background text-sm transition-colors">
-                  Refund Policy
+                  Refund & Cancellation
                 </Link>
               </li>
             </ul>
@@ -87,15 +89,15 @@ export const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-sm text-background/70">
                 <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>hello@aurabites.in</span>
+                <span>{CONTACT_INFO.EMAIL}</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-background/70">
                 <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>+91 98765 43210</span>
+                <span>{CONTACT_INFO.PHONE}</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-background/70">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>Mumbai, Maharashtra, India</span>
+                <span>{CONTACT_INFO.ADDRESS}</span>
               </li>
             </ul>
           </div>

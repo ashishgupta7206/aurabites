@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { CONTACT_INFO } from '@/lib/constants';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -36,7 +37,7 @@ const ContactPage = () => {
 
       <div className="min-h-screen bg-background">
         <Navbar />
-        
+
         <main className="pt-24 pb-32 md:pb-16">
           {/* Header */}
           <section className="gradient-cream py-12 md:py-20">
@@ -65,8 +66,8 @@ const ContactPage = () => {
                         </div>
                         <div>
                           <p className="font-semibold">Email</p>
-                          <a href="mailto:hello@aurabites.in" className="text-muted-foreground hover:text-primary">
-                            hello@aurabites.in
+                          <a href={`mailto:${CONTACT_INFO.EMAIL}`} className="text-muted-foreground hover:text-primary">
+                            {CONTACT_INFO.EMAIL}
                           </a>
                         </div>
                       </div>
@@ -76,8 +77,8 @@ const ContactPage = () => {
                         </div>
                         <div>
                           <p className="font-semibold">Phone</p>
-                          <a href="tel:+919876543210" className="text-muted-foreground hover:text-primary">
-                            +91 98765 43210
+                          <a href={`tel:${CONTACT_INFO.PHONE.replace(/\s+/g, '')}`} className="text-muted-foreground hover:text-primary">
+                            {CONTACT_INFO.PHONE}
                           </a>
                         </div>
                       </div>
@@ -88,7 +89,7 @@ const ContactPage = () => {
                         <div>
                           <p className="font-semibold">Address</p>
                           <p className="text-muted-foreground">
-                            Mumbai, Maharashtra, India
+                            {CONTACT_INFO.ADDRESS}
                           </p>
                         </div>
                       </div>
@@ -98,7 +99,7 @@ const ContactPage = () => {
                         </div>
                         <div>
                           <p className="font-semibold">Instagram</p>
-                          <a href="https://instagram.com/aurabites" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                          <a href={CONTACT_INFO.INSTAGRAM} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
                             @aurabites
                           </a>
                         </div>

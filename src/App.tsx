@@ -19,6 +19,10 @@ import OrderSuccessPage from "./pages/OrderSuccessPage";
 import OrderFailedPage from "./pages/OrderFailedPage";
 import OrderHistoryPage from "./pages/OrderHistoryPage";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import RefundPolicyPage from "./pages/RefundPolicyPage";
+import ShippingPolicyPage from "./pages/ShippingPolicyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +50,10 @@ const App = () => (
                 <Route path="/order-failed" element={<OrderFailedPage />} />
                 <Route path="/orders" element={<OrderHistoryPage />} />
                 <Route path="/orders/:id" element={<OrderDetailsPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/refund" element={<RefundPolicyPage />} />
+                <Route path="/shipping" element={<ShippingPolicyPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
