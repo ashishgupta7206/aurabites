@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Mail, Phone, MapPin, Send, Instagram } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Instagram, Loader2 } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { CartBar } from '@/components/CartBar';
@@ -20,19 +20,58 @@ const ContactPage = () => {
     message: '',
     orderId: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.email && !formData.mobileNo) {
       toast({
-        title: "Error",
+        title: "Validation Error",
         description: "Please provide either an email or a mobile number.",
         variant: "destructive",
       });
       return;
     }
 
+    if (formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        toast({
+          title: "Invalid Email",
+          description: "Please enter a valid email address.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    if (formData.mobileNo) {
+      // Allow 10 digits
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(formData.mobileNo.replace(/\D/g, ''))) {
+        toast({
+          title: "Invalid Mobile Number",
+          description: "Please enter a valid 10-digit mobile number.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    if (formData.orderId) {
+      // Basic check, adjust if your Order ID format is specific
+      if (formData.orderId.trim().length === 0) {
+        toast({
+          title: "Invalid Order ID",
+          description: "Please enter a valid Order ID.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
     try {
       const response = await fetch('/api/contact-us', {
         method: 'POST',
@@ -57,6 +96,8 @@ const ContactPage = () => {
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -159,7 +200,7 @@ const ContactPage = () => {
                       <Label htmlFor="mobileNo">Mobile Number (Optional if Email is provided)</Label>
                       <Input
                         id="mobileNo"
-                        type="tel"
+                        type="number"
                         placeholder="9876543210"
                         value={formData.mobileNo}
                         onChange={(e) => setFormData({ ...formData, mobileNo: e.target.value })}
@@ -198,9 +239,13 @@ const ContactPage = () => {
                         className="rounded-xl min-h-[120px]"
                       />
                     </div>
-                    <Button type="submit" className="w-full rounded-xl">
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Message
+                    <Button type="submit" className="w-full rounded-xl" disabled={isSubmitting}>
+                      {isSubmitting ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4 mr-2" />
+                      )}
+                      {isSubmitting ? "Sending..." : "Send Message"}
                     </Button>
                   </form>
                 </div>
