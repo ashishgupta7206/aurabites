@@ -16,16 +16,48 @@ const ContactPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    mobileNo: '',
     message: '',
+    orderId: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Message sent! 📬",
-      description: "We'll get back to you within 24 hours.",
-    });
-    setFormData({ name: '', email: '', message: '' });
+
+    if (!formData.email && !formData.mobileNo) {
+      toast({
+        title: "Error",
+        description: "Please provide either an email or a mobile number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/contact-us', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Message sent! 📬",
+          description: "We'll get back to you within 24 hours.",
+        });
+        setFormData({ name: '', email: '', mobileNo: '', message: '', orderId: '' });
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -124,14 +156,34 @@ const ContactPage = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="mobileNo">Mobile Number (Optional if Email is provided)</Label>
+                      <Input
+                        id="mobileNo"
+                        type="tel"
+                        placeholder="9876543210"
+                        value={formData.mobileNo}
+                        onChange={(e) => setFormData({ ...formData, mobileNo: e.target.value })}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email (Optional if Mobile is provided)</Label>
                       <Input
                         id="email"
                         type="email"
                         placeholder="you@example.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="orderId">Order ID (Optional)</Label>
+                      <Input
+                        id="orderId"
+                        placeholder="ORD-12345"
+                        value={formData.orderId}
+                        onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
                         className="rounded-xl"
                       />
                     </div>
