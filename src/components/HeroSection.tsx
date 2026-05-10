@@ -7,8 +7,8 @@ import { landingFlavours } from '@/data/landingFlavours';
 export const HeroSection = () => {
   const heroFlavor = landingFlavours[0];
 
-  const scrollToFlavours = () => {
-    document.getElementById('flavours')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollToProducts = () => {
+    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
@@ -50,7 +50,7 @@ export const HeroSection = () => {
             <Button
               type="button"
               size="lg"
-              onClick={scrollToFlavours}
+              onClick={scrollToProducts}
               className="w-full rounded-full bg-[#f7efe2] px-7 text-base font-bold text-[#1b120d] shadow-[0_18px_50px_rgba(232,79,26,0.28)] hover:bg-white sm:w-auto"
             >
               Explore Flavours

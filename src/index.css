@@ -125,11 +125,11 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   html {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -721,14 +721,15 @@
   right: max(1rem, calc((100vw - 1200px) / 2 + 1rem));
   top: 50%;
   z-index: 35;
-  width: min(270px, 28vw);
+  width: min(260px, 24vw);
   transform: translateY(-50%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 1.5rem;
-  background: rgba(255, 255, 255, 0.055);
-  padding: 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1rem 1.1rem;
   text-align: right;
   backdrop-filter: blur(18px) saturate(130%);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
 }
 
 .aura-motion-label p {
@@ -829,18 +830,58 @@
 
 .aura-makhana {
   z-index: 175;
-  width: 58px;
-  height: 58px;
+  width: 64px;
+  height: 60px;
+  border-radius: 54% 46% 58% 42% / 60% 56% 44% 40%;
+  background:
+    /* primary highlight */
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 22%),
+    /* secondary specular */
+    radial-gradient(circle at 38% 30%, rgba(255, 252, 240, 0.75), rgba(255, 252, 240, 0) 10%),
+    /* roasted spots */
+    radial-gradient(circle at 68% 40%, rgba(108, 60, 22, 0.5), rgba(108, 60, 22, 0) 6%),
+    radial-gradient(circle at 24% 64%, rgba(120, 70, 32, 0.42), rgba(120, 70, 32, 0) 5%),
+    radial-gradient(circle at 72% 72%, rgba(96, 52, 18, 0.45), rgba(96, 52, 18, 0) 7%),
+    radial-gradient(circle at 50% 84%, rgba(86, 48, 18, 0.32), rgba(86, 48, 18, 0) 8%),
+    radial-gradient(circle at 18% 38%, rgba(110, 64, 28, 0.3), rgba(110, 64, 28, 0) 5%),
+    /* dimple shadow */
+    radial-gradient(ellipse at 56% 56%, rgba(94, 56, 22, 0.22), rgba(94, 56, 22, 0) 28%),
+    /* base puffed body */
+    radial-gradient(ellipse at 42% 38%, #fff8e9 0%, #f4ddb6 40%, #d8a96a 72%, #a36c3a 100%);
+  box-shadow:
+    inset -9px -11px 16px rgba(94, 56, 22, 0.34),
+    inset 8px 7px 12px rgba(255, 250, 230, 0.55),
+    inset 0 0 8px rgba(255, 240, 200, 0.4),
+    0 12px 22px rgba(0, 0, 0, 0.42),
+    0 3px 6px rgba(0, 0, 0, 0.28);
+}
+
+.aura-makhana::before {
+  content: "";
+  position: absolute;
+  top: 28%;
+  left: 36%;
+  width: 32%;
+  height: 22%;
+  border-radius: 60% 40% 56% 44% / 70% 60% 40% 30%;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(120, 72, 32, 0.45), rgba(120, 72, 32, 0) 65%);
+  filter: blur(1.2px);
+  pointer-events: none;
+}
+
+.aura-makhana::after {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: 28%;
+  width: 38%;
+  height: 24%;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 29% 22%, rgba(255, 255, 255, 0.96), transparent 18%),
-    radial-gradient(circle at 62% 70%, rgba(83, 55, 30, 0.28), transparent 8%),
-    radial-gradient(circle at 46% 36%, rgba(106, 74, 41, 0.2), transparent 6%),
-    linear-gradient(135deg, #fff0cf, #c18b55);
-  box-shadow:
-    inset -10px -12px 16px rgba(77, 45, 21, 0.24),
-    inset 9px 8px 14px rgba(255, 255, 255, 0.42),
-    0 14px 24px rgba(0, 0, 0, 0.34);
+    radial-gradient(ellipse at 38% 26%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%);
+  filter: blur(0.6px);
+  pointer-events: none;
 }
 
 .aura-particle {
