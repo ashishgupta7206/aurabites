@@ -1,106 +1,117 @@
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { landingFlavours } from '@/data/landingFlavours';
 
 export const HeroSection = () => {
+  const heroFlavor = landingFlavours[0];
+
+  const scrollToFlavours = () => {
+    document.getElementById('flavours')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden gradient-hero pt-20">
-      {/* Floating Makhana Doodles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 left-[10%] text-6xl animate-float opacity-40">🫛</div>
-        <div className="absolute top-40 right-[15%] text-5xl animate-float-slow opacity-30" style={{ animationDelay: '1s' }}>✨</div>
-        <div className="absolute bottom-32 left-[20%] text-4xl animate-float opacity-35" style={{ animationDelay: '0.5s' }}>🌾</div>
-        <div className="absolute bottom-20 right-[25%] text-5xl animate-float-slow opacity-40" style={{ animationDelay: '1.5s' }}>🍃</div>
-        <div className="absolute top-60 left-[5%] text-3xl animate-float opacity-25" style={{ animationDelay: '2s' }}>⭐</div>
+    <section className="ab-hero relative isolate min-h-screen overflow-hidden pt-24 text-[#fff7ea]">
+      <div className="ab-studio-grain" aria-hidden="true" />
+      <div className="ab-particle-field" aria-hidden="true">
+        {Array.from({ length: 20 }).map((_, index) => (
+          <span
+            key={index}
+            style={
+              {
+                '--i': index,
+                left: `${6 + index * 4.6}%`,
+                top: `${12 + (index % 6) * 12}%`,
+                animationDelay: `${index * -0.37}s`,
+              } as CSSProperties
+            }
+          />
+        ))}
       </div>
 
-      {/* Video Background */}
-      <div className="absolute inset-0 z-0">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="w-full h-full object-cover opacity-20"
-          poster="/placeholder.svg"
-        >
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-hands-of-a-woman-taking-a-bowl-of-nuts-42877-large.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center">
-        <div className="max-w-3xl mx-auto space-y-6">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/80 rounded-full text-sm font-medium text-secondary-foreground animate-fade-in">
-            <Sparkles className="w-4 h-4 text-flavor-gold" />
-            <span>India's Favorite Healthy Snack</span>
+      <div className="container relative z-10 mx-auto grid min-h-[calc(100vh-6rem)] items-center gap-10 px-4 py-12 lg:grid-cols-[1fr_minmax(320px,520px)_1fr]">
+        <div className="max-w-xl space-y-6 text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#ffd2a8] backdrop-blur-md">
+            <Sparkles className="h-4 w-4" />
+            Premium roasted makhana
           </div>
 
-          {/* Heading */}
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-extrabold text-foreground leading-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            Snack Smart with{' '}
-            <span className="text-primary relative">
-              Aurabites
-              <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none">
-                <path d="M2 8C50 2 150 2 198 8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="text-flavor-gold opacity-60" />
-              </svg>
-            </span>
-          </h1>
+          <div className="space-y-5">
+            <h1 className="font-display text-5xl font-extrabold leading-[0.9] tracking-tight text-balance md:text-7xl xl:text-8xl">
+              Snack Light. Crunch Right.
+            </h1>
+            <p className="mx-auto max-w-[21rem] text-base leading-8 text-[#d6c7b4] md:max-w-xl md:text-xl lg:mx-0">
+              Premium roasted makhana in bold Indian-inspired flavours.
+            </p>
+          </div>
 
-          {/* Subtitle */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Premium roasted makhana snacks packed with{' '}
-            <span className="font-semibold text-foreground">10g protein</span>.
-            Guilt-free, crunchy, and absolutely delicious.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="mx-auto flex w-full max-w-[20rem] flex-col gap-3 sm:flex-row sm:justify-center lg:mx-0 lg:max-w-none lg:justify-start">
+            <Button
+              type="button"
+              size="lg"
+              onClick={scrollToFlavours}
+              className="w-full rounded-full bg-[#f7efe2] px-7 text-base font-bold text-[#1b120d] shadow-[0_18px_50px_rgba(232,79,26,0.28)] hover:bg-white sm:w-auto"
+            >
+              Explore Flavours
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
             <Link to="/shop">
-              <Button size="lg" className="rounded-full px-8 text-base font-semibold shadow-medium hover:shadow-lift transition-all">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full rounded-full border-white/25 bg-white/5 px-7 text-base font-bold text-white backdrop-blur-md hover:bg-white/12 hover:text-white sm:w-auto"
+              >
+                <ShoppingBag className="mr-2 h-5 w-5" />
                 Shop Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/categories">
-              <Button variant="outline" size="lg" className="rounded-full px-8 text-base font-semibold bg-background/50 hover:bg-background">
-                Explore Flavors
               </Button>
             </Link>
           </div>
+        </div>
 
-          {/* Trust Badges */}
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-xl">🌱</span>
-              <span>100% Natural</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-xl">💪</span>
-              <span>High Protein</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-xl">🔥</span>
-              <span>Low Calorie</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-xl">🚫</span>
-              <span>No Preservatives</span>
+        <div className="ab-hero-jar-wrap mx-auto">
+          <div className="ab-hero-ghost" aria-hidden="true">
+            MAKHANA
+          </div>
+          <div className="ab-hero-jar">
+            <img
+              src={heroFlavor.image}
+              alt={heroFlavor.alt}
+              width="760"
+              height="1500"
+              className="ab-hero-jar-image"
+            />
+          </div>
+          <div className="ab-hero-floor" aria-hidden="true" />
+        </div>
+
+        <div className="hidden justify-self-end lg:block">
+          <div className="ab-hero-panel">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#ffb47a]">
+              Now pouring
+            </p>
+            <h2 className="mt-4 font-display text-4xl font-extrabold leading-none">
+              {heroFlavor.name}
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-[#d6c7b4]">
+              {heroFlavor.description}
+            </p>
+            <div className="mt-7 grid grid-cols-2 gap-4 border-t border-white/10 pt-5">
+              <div>
+                <p className="font-display text-3xl font-extrabold">{heroFlavor.kcal}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#a99680]">
+                  kcal
+                </p>
+              </div>
+              <div>
+                <p className="font-display text-3xl font-extrabold">{heroFlavor.protein}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#a99680]">
+                  protein
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Wave Divider */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-16 md:h-24">
-          <path
-            d="M0,60 C200,120 400,0 600,60 C800,120 1000,0 1200,60 L1200,120 L0,120 Z"
-            className="fill-background"
-          />
-        </svg>
       </div>
     </section>
   );

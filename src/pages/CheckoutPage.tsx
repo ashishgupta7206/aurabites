@@ -9,6 +9,7 @@ import {
   CreditCard,
   Truck,
   CheckCircle,
+  Gift,
 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
@@ -25,18 +26,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { KEYRING_STORAGE_KEY, sanitizeKeyringName } from "@/lib/keyring";
 
 const CheckoutPage = () => {
   const { items, clearCart } = useCart();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState("online");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [keyringTouched, setKeyringTouched] = useState(false);
 
   // Preview state
   const [preview, setPreview] = useState<any>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     name: "",
     phone: "",
     email: "",
@@ -44,7 +47,8 @@ const CheckoutPage = () => {
     city: "",
     state: "",
     pincode: "",
-  });
+    keyringName: typeof window === "undefined" ? "" : localStorage.getItem(KEYRING_STORAGE_KEY) || "",
+  }));
 
   const baseUrl = import.meta.env?.VITE_API_BASE_URL;
 
@@ -66,6 +70,20 @@ const CheckoutPage = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+    if (keyringTouched) return;
+    const firstName = sanitizeKeyringName(formData.name.split(/\s+/)[0] || "");
+    if (!firstName) return;
+    setFormData((prev) => (prev.keyringName === firstName ? prev : { ...prev, keyringName: firstName }));
+  }, [formData.name, keyringTouched]);
+
+  useEffect(() => {
+    const cleanName = sanitizeKeyringName(formData.keyringName);
+    if (cleanName) {
+      localStorage.setItem(KEYRING_STORAGE_KEY, cleanName);
+    }
+  }, [formData.keyringName]);
 
   // ✅ Razorpay Open
   const openRazorpay = (payment: any, orderId: number) => {
@@ -282,6 +300,8 @@ const CheckoutPage = () => {
     }
 
     const token = Cookies.get("token");
+    const fallbackKeyringName = sanitizeKeyringName(formData.name.split(/\s+/)[0] || "Aura");
+    const freeKeyringName = sanitizeKeyringName(formData.keyringName) || fallbackKeyringName || "Aura";
 
 
 
@@ -308,6 +328,9 @@ const CheckoutPage = () => {
           },
           paymentMethod: paymentMethod === 'online' ? 'ONLINE' : 'COD',
           emailId: formData.email,
+          freeKeyringClaimed: true,
+          freeKeyringName,
+          freeKeyringSource: "WEBSITE_ORDER",
           items: items.map((i) => ({
             productVariantId: i.id,
             quantity: i.quantity,
@@ -577,6 +600,58 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
+                {/* Free Keyring */}
+                <div className="bg-card rounded-2xl border border-border p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Gift className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h2 className="font-display font-bold text-lg">
+                        Free Named Keyring
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        Worth Rs 200, included with every website order.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-5 md:grid-cols-[1fr_180px] md:items-center">
+                    <div className="space-y-2">
+                      <Label htmlFor="keyringName">Name on keyring</Label>
+                      <Input
+                        id="keyringName"
+                        name="keyringName"
+                        placeholder="Max 10 characters"
+                        value={formData.keyringName}
+                        maxLength={10}
+                        onChange={(e) => {
+                          setKeyringTouched(true);
+                          setFormData((prev) => ({ ...prev, keyringName: sanitizeKeyringName(e.target.value) }));
+                        }}
+                        className="rounded-xl"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        If left blank, we will use your delivery first name.
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 text-center">
+                      <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-100 to-orange-100 shadow-inner">
+                        <span className="text-xs font-black uppercase text-primary">
+                          {(sanitizeKeyringName(formData.keyringName) || sanitizeKeyringName(formData.name.split(/\s+/)[0] || "Aura")).slice(0, 4)}
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                        Free gift
+                      </p>
+                      <p className="mt-1 text-sm font-bold">
+                        Rs 200 value
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Payment Method */}
                 <div className="bg-card rounded-2xl border border-border p-6">
                   <div className="flex items-center gap-3 mb-6">
@@ -700,6 +775,13 @@ const CheckoutPage = () => {
                         ? `Delivery ₹${preview.deliveryCharge}`
                         : "Free Delivery"
                       : "Free Delivery"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-xl mb-4">
+                  <Gift className="w-5 h-5 text-primary" />
+                  <span className="text-sm font-medium text-primary">
+                    Free named keyring worth Rs 200
                   </span>
                 </div>
 

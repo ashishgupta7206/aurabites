@@ -1,10 +1,13 @@
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/Navbar';
 import { HeroSection } from '@/components/HeroSection';
-import { FeaturedProducts } from '@/components/FeaturedProducts';
-import { CategoriesSection } from '@/components/CategoriesSection';
-import { AllProducts } from '@/components/AllProducts';
-import { ReviewsSection } from '@/components/ReviewsSection';
+import { AuraMotionStage } from '@/components/AuraMotionStage';
+import { ProductShowcase } from '@/components/ProductShowcase';
+import { BenefitsSection } from '@/components/BenefitsSection';
+import { BrandStory } from '@/components/BrandStory';
+import { KeyringClaimSection } from '@/components/KeyringClaimSection';
+import { ProductGrid } from '@/components/ProductGrid';
+import { CTASection } from '@/components/CTASection';
 import { Footer } from '@/components/Footer';
 import { CartBar } from '@/components/CartBar';
 import { CartDrawer } from '@/components/CartDrawer';
@@ -13,22 +16,28 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Aurabites – Premium Makhana Snacks | Healthy & Delicious</title>
-        <meta name="description" content="Discover Aurabites premium roasted makhana snacks. 10g protein, natural ingredients, zero preservatives. India's favorite healthy snack brand." />
+        <title>AuraBites Makhana | Snack Light. Crunch Right.</title>
+        <meta
+          name="description"
+          content="Premium roasted AuraBites makhana in bold Indian-inspired flavours. Explore the animated flavour showcase and claim a free named keyring worth Rs 200 with every order."
+        />
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-[#0b0b0c]">
         <Navbar />
         <main>
           <HeroSection />
-          <FeaturedProducts />
-          <CategoriesSection />
-          <AllProducts />
-          <ReviewsSection />
+          <AuraMotionStage />
+          <ProductShowcase />
+          <BenefitsSection />
+          <BrandStory />
+          <KeyringClaimSection />
+          <ProductGrid />
+          <CTASection />
         </main>
         <Footer />
         <CartBar />
-        <CartDrawer />                                                    
+        <CartDrawer />
       </div>
     </>
   );

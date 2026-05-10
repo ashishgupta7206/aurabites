@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User, LogOut, Package } from 'lucide-react';
+import { ShoppingCart, Menu, User, LogOut, Package } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Shop', path: '/shop' },
   { name: 'Categories', path: '/categories' },
+  { name: 'Free Keyring', path: '/claim-keyring' },
   { name: 'About', path: '/about' },
   { name: 'Contact', path: '/contact' },
 ];
@@ -28,6 +29,7 @@ export const Navbar = () => {
   const { totalItems, setIsCartOpen } = useCart();
   const { user, logout } = useAuth();
   const location = useLocation();
+  const isHome = location.pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,14 +41,14 @@ export const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'navbar-solid' : 'navbar-transparent bg-background/80 backdrop-blur-sm'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'navbar-solid' : isHome ? 'bg-transparent text-white' : 'navbar-transparent bg-background/80 backdrop-blur-sm'
         }`}
     >
       <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <span className="text-2xl"></span>
-          <span className="font-display font-extrabold text-xl md:text-2xl text-primary">
+          <span className={`font-display font-extrabold text-xl md:text-2xl ${isHome && !isScrolled ? 'text-white' : 'text-primary'}`}>
             Aurabites
           </span>
         </Link>
@@ -58,8 +60,8 @@ export const Navbar = () => {
               <Link
                 to={link.path}
                 className={`font-medium text-sm transition-colors hover:text-primary ${location.pathname === link.path
-                  ? 'text-primary'
-                  : 'text-foreground/70'
+                  ? isHome && !isScrolled ? 'text-white' : 'text-primary'
+                  : isHome && !isScrolled ? 'text-white/72 hover:text-white' : 'text-foreground/70'
                   }`}
               >
                 {link.name}

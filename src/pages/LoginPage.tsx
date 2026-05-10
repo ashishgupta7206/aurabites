@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext'; // Added useAuth
 import { toast } from 'sonner'; // Added toast
-import Cookies from 'js-cookie';
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,14 +17,16 @@ const LoginPage = () => {
 
   const { register, login, isLoading, user } = useAuth(); // Destructure user
   const navigate = useNavigate();
-  const token = Cookies.get('token')
+  const [searchParams] = useSearchParams();
+  const redirectParam = searchParams.get('redirect');
+  const redirectTo = redirectParam?.startsWith('/') ? redirectParam : '/';
 
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate(redirectTo);
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +44,7 @@ const LoginPage = () => {
           password
         });
         toast.success("Account created successfully!");
-        navigate('/'); // Redirect to home on success
+        navigate(redirectTo);
       } catch (err: any) {
         console.error(err);
         toast.error(err.message || "Registration failed");
@@ -60,7 +61,7 @@ const LoginPage = () => {
           password
         });
         toast.success("Login successful!");
-        navigate('/');
+        navigate(redirectTo);
       } catch (err: any) {
         console.error(err);
         toast.error(err.message || "Login failed");

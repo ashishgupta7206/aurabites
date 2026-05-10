@@ -6,24 +6,27 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import Index from "./pages/Index";
-import ShopPage from "./pages/ShopPage";
-import CategoriesPage from "./pages/CategoriesPage";
-import CategoryPage from "./pages/CategoryPage";
-import LoginPage from "./pages/LoginPage";
-import CheckoutPage from "./pages/CheckoutPage";
-import ProductDetailPage from "./pages/ProductDetailPage";
-import AboutPage from "./pages/AboutPage";
-import ContactPage from "./pages/ContactPage";
-import OrderSuccessPage from "./pages/OrderSuccessPage";
-import OrderFailedPage from "./pages/OrderFailedPage";
-import OrderHistoryPage from "./pages/OrderHistoryPage";
-import OrderDetailsPage from "./pages/OrderDetailsPage";
-import TermsPage from "./pages/TermsPage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import RefundPolicyPage from "./pages/RefundPolicyPage";
-import ShippingPolicyPage from "./pages/ShippingPolicyPage";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+
+const Index = lazy(() => import("./pages/Index"));
+const ShopPage = lazy(() => import("./pages/ShopPage"));
+const CategoriesPage = lazy(() => import("./pages/CategoriesPage"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
+const ProductDetailPage = lazy(() => import("./pages/ProductDetailPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const ClaimKeyringPage = lazy(() => import("./pages/ClaimKeyringPage"));
+const OrderSuccessPage = lazy(() => import("./pages/OrderSuccessPage"));
+const OrderFailedPage = lazy(() => import("./pages/OrderFailedPage"));
+const OrderHistoryPage = lazy(() => import("./pages/OrderHistoryPage"));
+const OrderDetailsPage = lazy(() => import("./pages/OrderDetailsPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const RefundPolicyPage = lazy(() => import("./pages/RefundPolicyPage"));
+const ShippingPolicyPage = lazy(() => import("./pages/ShippingPolicyPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -36,27 +39,30 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/categories" element={<CategoriesPage />} />
-                <Route path="/category/:id" element={<CategoryPage />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/order-success" element={<OrderSuccessPage />} />
-                <Route path="/order-failed" element={<OrderFailedPage />} />
-                <Route path="/orders" element={<OrderHistoryPage />} />
-                <Route path="/orders/:id" element={<OrderDetailsPage />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="/privacy" element={<PrivacyPolicyPage />} />
-                <Route path="/refund" element={<RefundPolicyPage />} />
-                <Route path="/shipping" element={<ShippingPolicyPage />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <Suspense fallback={<div className="min-h-screen bg-background" />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/shop" element={<ShopPage />} />
+                  <Route path="/categories" element={<CategoriesPage />} />
+                  <Route path="/category/:id" element={<CategoryPage />} />
+                  <Route path="/product/:id" element={<ProductDetailPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/claim-keyring" element={<ClaimKeyringPage />} />
+                  <Route path="/order-success" element={<OrderSuccessPage />} />
+                  <Route path="/order-failed" element={<OrderFailedPage />} />
+                  <Route path="/orders" element={<OrderHistoryPage />} />
+                  <Route path="/orders/:id" element={<OrderDetailsPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                  <Route path="/refund" element={<RefundPolicyPage />} />
+                  <Route path="/shipping" element={<ShippingPolicyPage />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
             </BrowserRouter>
           </TooltipProvider>
         </CartProvider>
