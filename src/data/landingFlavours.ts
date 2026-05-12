@@ -36,6 +36,10 @@ export interface LandingFlavor {
   kcal: number;
   protein: string;
   sku: string;
+  /** Retail price (INR) for a single 70g jar */
+  price: number;
+  /** MRP before discount, optional */
+  mrp?: number;
   image: string;
   alt: string;
   shopPath: string;
@@ -68,6 +72,8 @@ export const landingFlavours: LandingFlavor[] = [
     sku: 'AB-MAK-JAR-PERI',
     image: jarPeri,
     alt: 'AuraBites Peri-Peri makhana jar',
+    price: 199,
+    mrp: 249,
     shopPath: '/shop',
     ingredients:
       'Foxnut, Sugar, Rice Bran Oil, Spices & Condiments (Red Chilli, Dried Mango, Dried Onion, Coriander Seeds, Cumin, Dried Garlic Flakes, Nutmeg, Mace), Himalayan Pink Salt, Maltodextrin, Tomato Powder, Acidity Regulator (INS-330 & INS-296), Hydrolysed Peanut Protein, Colour (INS-160C), Nausadar (INS-510), Nature Identical Flavouring Substances (Peri Peri), Flavour Enhancer (INS-627 & INS-631).',
@@ -104,6 +110,8 @@ export const landingFlavours: LandingFlavor[] = [
     sku: 'AB-MAK-JAR-CREAM',
     image: jarCream,
     alt: 'AuraBites Cream and Onion makhana jar',
+    price: 199,
+    mrp: 249,
     shopPath: '/shop',
     ingredients:
       'Foxnut, Sugar, Rice Bran Oil, Spices & Condiments (Onion, Milk Solids), Himalayan Pink Salt, Maltodextrin, Parsley, Yellow Chilli, Garlic, Acidity Regulator (INS-330 & INS-296), Nature Identical Flavouring Substances, Flavour Enhancer (INS-627 & INS-631), Anticaking Agent (INS-551). Contains milk.',
@@ -140,6 +148,8 @@ export const landingFlavours: LandingFlavor[] = [
     sku: 'AB-MAK-JAR-MINT',
     image: jarPudina,
     alt: 'AuraBites Mint Pudina makhana jar',
+    price: 199,
+    mrp: 249,
     shopPath: '/shop',
     ingredients:
       'Foxnut, Sugar, Rice Bran Oil, Spices & Condiments (Red Chilli, Coriander Seeds, Dried Mango, Cumin, Turmeric, Dried Ginger, Long Pepper, Fenugreek, Mace, Nutmeg), Himalayan Pink Salt, Black Salt, Mint Leaves, Fenugreek Leaves, Hydrolysed Peanut Protein, Acidity Regulator (INS-330 & INS-296), Nature Identical Flavouring Substances (Spicy Treat), Flavour Enhancer (INS-627 & INS-631), Anticaking Agent (INS-551).',
@@ -176,6 +186,8 @@ export const landingFlavours: LandingFlavor[] = [
     sku: 'AB-MAK-JAR-TANDOORI',
     image: jarTandoori,
     alt: 'AuraBites Tandoori Masala makhana jar',
+    price: 199,
+    mrp: 249,
     shopPath: '/shop',
     ingredients:
       'Foxnut, Sugar, Rice Bran Oil, Spices & Condiments (Red Chilli, Dried Onion, Coriander Seeds, Cinnamon, Dried Garlic Flakes, Fenugreek), Himalayan Pink Salt, Acidity Regulator (INS-330), Hydrolysed Peanut Protein, Colour (INS-160C), Nausadar (INS-510), Nature Identical Flavouring Substances (Tandoori Masala), Flavour Enhancer (INS-627 & INS-631), Anticaking Agent (INS-551).',
@@ -212,6 +224,8 @@ export const landingFlavours: LandingFlavor[] = [
     sku: 'AB-MAK-JAR-SALT',
     image: jarSalt,
     alt: 'AuraBites Himalayan Salt and Pepper makhana jar',
+    price: 199,
+    mrp: 249,
     shopPath: '/shop',
     ingredients:
       'Foxnut, Sugar, Rice Bran Oil, Black Pepper, Himalayan Pink Salt, Milk Solid, Maltodextrin, Hydrolysed Peanut Protein, Flavour Enhancer (INS-627 & INS-631), Nature Identical Flavouring Substances, Anticaking Agent (INS-551). Contains milk.',

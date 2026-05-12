@@ -2,11 +2,10 @@ import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/Navbar';
 import { HeroSection } from '@/components/HeroSection';
 import { AuraMotionStage } from '@/components/AuraMotionStage';
-import { ProductShowcase } from '@/components/ProductShowcase';
+import { HeroFlavorCarousel } from '@/components/HeroFlavorCarousel';
 import { BenefitsSection } from '@/components/BenefitsSection';
 import { BrandStory } from '@/components/BrandStory';
 import { KeyringClaimSection } from '@/components/KeyringClaimSection';
-import { ProductGrid } from '@/components/ProductGrid';
 import { CTASection } from '@/components/CTASection';
 import { Footer } from '@/components/Footer';
 import { CartBar } from '@/components/CartBar';
@@ -28,11 +27,10 @@ const Index = () => {
         <main>
           <AuraMotionStage />
           <HeroSection />
-          <ProductShowcase />
+          <HeroFlavorCarousel />
           <BenefitsSection />
           <BrandStory />
           <KeyringClaimSection />
-          <ProductGrid />
           <CTASection />
         </main>
         <Footer />

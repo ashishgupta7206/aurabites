@@ -526,7 +526,13 @@ const CheckoutPage = () => {
         <title>Checkout – Aurabites</title>
       </Helmet>
 
-      <div className="min-h-screen bg-background pb-8">
+      <div
+        className="min-h-screen pb-8"
+        style={{
+          background:
+            'radial-gradient(ellipse at 50% 0%, rgba(255, 180, 122, 0.18) 0%, transparent 50%), linear-gradient(180deg, #faf4e9 0%, #fdf6e6 100%)',
+        }}
+      >
         {/* Header */}
         <header className="bg-card border-b border-border sticky top-0 z-40">
           <div className="container mx-auto px-4 py-4 flex items-center gap-4">
@@ -552,7 +558,7 @@ const CheckoutPage = () => {
                 className="space-y-6"
               >
                 {/* Delivery Details */}
-                <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="bg-white rounded-2xl border border-[#f0e3c8] p-6 shadow-[0_8px_20px_-12px_rgba(22,13,9,0.12)]">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                       <MapPin className="w-5 h-5 text-primary" />
@@ -713,7 +719,7 @@ const CheckoutPage = () => {
                 </div>
 
                 {/* Free Keyring */}
-                <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="bg-white rounded-2xl border border-[#f0e3c8] p-6 shadow-[0_8px_20px_-12px_rgba(22,13,9,0.12)]">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                       <Gift className="w-5 h-5 text-primary" />
@@ -765,7 +771,7 @@ const CheckoutPage = () => {
                 </div>
 
                 {/* Payment Method */}
-                <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="bg-white rounded-2xl border border-[#f0e3c8] p-6 shadow-[0_8px_20px_-12px_rgba(22,13,9,0.12)]">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                       <CreditCard className="w-5 h-5 text-primary" />
@@ -844,7 +850,7 @@ const CheckoutPage = () => {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-card rounded-2xl border border-border p-6 sticky top-24">
+              <div className="bg-white rounded-2xl border border-[#f0e3c8] p-6 shadow-[0_20px_40px_-20px_rgba(22,13,9,0.18)] sticky top-24">
                 <h2 className="font-display font-bold text-lg mb-4">
                   Order Summary
                 </h2>
