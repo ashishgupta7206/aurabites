@@ -13,7 +13,7 @@ const OrderHistoryPage = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const baseUrl = import.meta.env?.VITE_API_BASE_URL;
+                const baseUrl = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8000/api";
                 const token = Cookies.get("token");
                 if (!token) {
                     setLoading(false);
@@ -24,6 +24,7 @@ const OrderHistoryPage = () => {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
+                    credentials: "include",
                 });
                 const data = await res.json();
                 if (data?.success) {

@@ -16,7 +16,7 @@ const OrderDetailsPage = () => {
         const fetchOrderDetails = async () => {
             if (!id) return;
             try {
-                const baseUrl = import.meta.env?.VITE_API_BASE_URL;
+                const baseUrl = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8000/api";
                 const token = Cookies.get("token");
                 if (!token) {
                     navigate('/login');
@@ -27,6 +27,7 @@ const OrderDetailsPage = () => {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
+                    credentials: "include",
                 });
                 const data = await res.json();
                 if (data?.success) {
@@ -155,6 +156,16 @@ const OrderDetailsPage = () => {
                             <h2 className="font-semibold text-lg mb-4">Delivery Details</h2>
                             <div className="text-sm bg-background/50 p-4 rounded-lg border border-border/50 h-[calc(100%-2rem)]">
                                 <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">{orderDetails.addressSummary}</p>
+                                {orderDetails.freeGiftClaimed && (
+                                    <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                                            Free Gift
+                                        </p>
+                                        <p className="mt-1 font-medium text-foreground">
+                                            Named Keyring{orderDetails.freeGiftName ? ` - ${orderDetails.freeGiftName}` : ""}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
