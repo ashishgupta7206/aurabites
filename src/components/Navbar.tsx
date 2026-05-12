@@ -18,7 +18,7 @@ const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Shop', path: '/shop' },
   { name: 'Categories', path: '/categories' },
-  { name: 'Free Keyring', path: '/claim-keyring' },
+  { name: 'Claim Gift', path: '/claim-keyring' },
   { name: 'About', path: '/about' },
   { name: 'Contact', path: '/contact' },
 ];

@@ -28,7 +28,7 @@ export const KeyringClaimSection = () => {
             Claim your free named keyring worth Rs 200.
           </h2>
           <p className="mt-6 max-w-2xl text-base leading-8 text-[#6f5b4d]">
-            Every website order gets a custom AuraBites keyring with your name on it. Pick your crunch, type the name, and we will pack the gift with your order.
+            Every website order gets a custom AuraBites keyring with your name on it. Marketplace buyers can also claim with the unique code printed inside their AuraBites delivery.
           </p>
 
           <div className="mt-8 max-w-md">
@@ -52,7 +52,7 @@ export const KeyringClaimSection = () => {
               </Link>
             </div>
             <p className="mt-3 text-xs font-medium text-[#7b6755]">
-              If left blank at checkout, we will use your first name.
+              Have a marketplace code? <Link to="/claim-keyring" className="font-bold text-[#9a3b18] underline">Claim it here</Link>.
             </p>
           </div>
 

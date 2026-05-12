@@ -15,13 +15,14 @@ const OrderSuccessPage = () => {
         const fetchOrderDetails = async () => {
             if (!orderId) return;
             try {
-                const baseUrl = import.meta.env?.VITE_API_BASE_URL;
+                const baseUrl = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8000/api";
                 const token = Cookies.get("token");
                 const res = await fetch(`${baseUrl}/orders/${orderId}`, {
                     headers: {
                         "Content-Type": "application/json",
                         ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
+                    credentials: "include",
                 });
                 const data = await res.json();
                 if (data?.success) {
@@ -102,6 +103,15 @@ const OrderSuccessPage = () => {
                                             </p>
                                         </div>
                                     </div>
+
+                                    {orderDetails.freeGiftClaimed && (
+                                        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                                            <p className="text-sm text-muted-foreground">Free Gift</p>
+                                            <p className="font-semibold text-primary">
+                                                Named Keyring{orderDetails.freeGiftName ? ` - ${orderDetails.freeGiftName}` : ""}
+                                            </p>
+                                        </div>
+                                    )}
 
                                     <div className="space-y-3 pt-2">
                                         <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Items</h3>

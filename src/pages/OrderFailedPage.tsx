@@ -15,13 +15,14 @@ const OrderFailedPage = () => {
         const fetchOrderDetails = async () => {
             if (!orderId) return;
             try {
-                const baseUrl = import.meta.env?.VITE_API_BASE_URL;
+                const baseUrl = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8000/api";
                 const token = Cookies.get("token");
                 const res = await fetch(`${baseUrl}/orders/${orderId}`, {
                     headers: {
                         "Content-Type": "application/json",
                         ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
+                    credentials: "include",
                 });
                 const data = await res.json();
                 if (data?.success) {

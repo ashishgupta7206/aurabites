@@ -27,13 +27,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { KEYRING_STORAGE_KEY, sanitizeKeyringName } from "@/lib/keyring";
+import { useAuth } from "@/contexts/AuthContext";
+
+type SavedAddress = {
+  id: number;
+  fullName: string;
+  mobile: string;
+  pincode: string;
+  city: string;
+  state: string;
+  addressLine1: string;
+  addressLine2?: string;
+  landmark?: string;
+  addressType?: string;
+};
 
 const CheckoutPage = () => {
   const { items, clearCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState("online");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [keyringTouched, setKeyringTouched] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
 
   // Preview state
   const [preview, setPreview] = useState<any>(null);
@@ -50,7 +67,7 @@ const CheckoutPage = () => {
     keyringName: typeof window === "undefined" ? "" : localStorage.getItem(KEYRING_STORAGE_KEY) || "",
   }));
 
-  const baseUrl = import.meta.env?.VITE_API_BASE_URL;
+  const baseUrl = import.meta.env?.VITE_API_BASE_URL || "http://localhost:8000/api";
 
   const INDIAN_STATES = [
     "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -84,6 +101,69 @@ const CheckoutPage = () => {
       localStorage.setItem(KEYRING_STORAGE_KEY, cleanName);
     }
   }, [formData.keyringName]);
+
+  useEffect(() => {
+    if (!user) {
+      setSavedAddresses([]);
+      setSelectedAddressId("new");
+      return;
+    }
+
+    const fetchSavedAddresses = async () => {
+      const token = Cookies.get("token");
+      if (!token) return;
+
+      try {
+        const res = await fetch(`${baseUrl}/profile/addresses`, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.success) return;
+
+        const addresses = data.data ?? [];
+        setSavedAddresses(addresses);
+
+        if (addresses.length > 0) {
+          const first = addresses[0];
+          setSelectedAddressId(String(first.id));
+          setFormData((prev) => ({
+            ...prev,
+            name: first.fullName ?? prev.name,
+            phone: first.mobile ?? prev.phone,
+            address: first.addressLine1 ?? prev.address,
+            city: first.city ?? prev.city,
+            state: first.state ?? prev.state,
+            pincode: first.pincode ?? prev.pincode,
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch saved addresses", err);
+      }
+    };
+
+    fetchSavedAddresses();
+  }, [baseUrl, user]);
+
+  const handleAddressSelection = (addressId: string) => {
+    setSelectedAddressId(addressId);
+    if (addressId === "new") return;
+
+    const selected = savedAddresses.find((address) => String(address.id) === addressId);
+    if (!selected) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      name: selected.fullName ?? prev.name,
+      phone: selected.mobile ?? prev.phone,
+      address: selected.addressLine1 ?? prev.address,
+      city: selected.city ?? prev.city,
+      state: selected.state ?? prev.state,
+      pincode: selected.pincode ?? prev.pincode,
+    }));
+  };
 
   // ✅ Razorpay Open
   const openRazorpay = (payment: any, orderId: number) => {
@@ -219,6 +299,7 @@ const CheckoutPage = () => {
 
     try {
       const body = {
+        ...(selectedAddressId !== "new" ? { addressId: Number(selectedAddressId) } : {}),
         items: items.map((i) => ({
           productVariantId: i.id,
           quantity: i.quantity,
@@ -235,6 +316,7 @@ const CheckoutPage = () => {
       const res = await fetch(`${baseUrl}/orders/preview`, {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify(body),
       });
 
@@ -275,7 +357,7 @@ const CheckoutPage = () => {
   useEffect(() => {
     fetchPreview();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
+  }, [items, selectedAddressId]);
 
   // ✅ Submit Checkout
   const handleSubmit = async (e: React.FormEvent) => {
@@ -310,27 +392,38 @@ const CheckoutPage = () => {
 
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
       };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const addressPayload =
+        selectedAddressId !== "new"
+          ? { addressId: Number(selectedAddressId) }
+          : {
+              address: {
+                fullName: formData.name,
+                mobile: formData.phone,
+                pincode: formData.pincode,
+                city: formData.city,
+                state: formData.state,
+                addressLine1: formData.address,
+                addressType: "HOME",
+              },
+            };
 
       // 1) Create Order
       const post_order = await fetch(`${baseUrl}/orders/create`, {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({
-          address: {
-            fullName: formData.name,
-            mobile: formData.phone,
-            pincode: formData.pincode,
-            city: formData.city,
-            state: formData.state,
-            addressLine1: formData.address,
-          },
+          ...addressPayload,
           paymentMethod: paymentMethod === 'online' ? 'ONLINE' : 'COD',
           emailId: formData.email,
-          freeKeyringClaimed: true,
-          freeKeyringName,
-          freeKeyringSource: "WEBSITE_ORDER",
+          freeGiftClaimed: true,
+          freeGiftType: "NAMED_KEYRING",
+          freeGiftName: freeKeyringName,
+          freeGiftSource: "WEBSITE_ORDER",
           items: items.map((i) => ({
             productVariantId: i.id,
             quantity: i.quantity,
@@ -339,6 +432,10 @@ const CheckoutPage = () => {
       });
 
       const order_data = await post_order.json();
+      if (!post_order.ok || !order_data?.success) {
+        throw new Error(order_data?.message || "Order creation failed");
+      }
+
       if (paymentMethod === "cod") {
         toast({
           title: "Order placed (COD)",
@@ -349,10 +446,6 @@ const CheckoutPage = () => {
         return;
       }
       // console.log("order_data:", order_data);
-
-      if (!post_order.ok || !order_data?.success) {
-        throw new Error(order_data?.message || "Order creation failed");
-      }
 
       const createdOrderId = order_data?.data?.id;
       const payableAmount = order_data?.data?.payableAmount;
@@ -475,6 +568,25 @@ const CheckoutPage = () => {
                   </div>
 
                   <div className="grid gap-4">
+                    {user && savedAddresses.length > 0 && (
+                      <div className="space-y-2">
+                        <Label htmlFor="savedAddress">Saved Address</Label>
+                        <Select value={selectedAddressId} onValueChange={handleAddressSelection}>
+                          <SelectTrigger id="savedAddress" className="rounded-xl">
+                            <SelectValue placeholder="Choose an address" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {savedAddresses.map((address) => (
+                              <SelectItem key={address.id} value={String(address.id)}>
+                                {address.fullName}, {address.city} - {address.pincode}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="new">Use a new address</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="name">Full Name *</Label>
