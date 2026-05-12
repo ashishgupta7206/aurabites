@@ -1078,10 +1078,37 @@
     display: none;
   }
 
+  /* Mobile paint optimization — mix-blend-mode is GPU-expensive on phones */
+  .aura-particle,
+  .aura-ingredient {
+    mix-blend-mode: normal;
+    box-shadow: none;
+  }
+
+  /* Simpler makhana paint on mobile — 8 radial gradients is too heavy */
+  .aura-makhana {
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 28%),
+      radial-gradient(ellipse at 42% 38%, #fff8e9 0%, #e8c98a 55%, #b07a3e 100%);
+    box-shadow:
+      inset -6px -8px 12px rgba(94, 56, 22, 0.32),
+      0 6px 12px rgba(0, 0, 0, 0.32);
+  }
+  .aura-makhana::before,
+  .aura-makhana::after {
+    display: none;
+  }
+
   .aura-motion-stage::after {
     background:
       linear-gradient(180deg, rgba(0, 0, 0, 0.64), transparent 28%, transparent 74%, rgba(0, 0, 0, 0.68)),
       radial-gradient(circle at 50% 50%, transparent 48%, rgba(0, 0, 0, 0.52));
+  }
+
+  /* Skip rendering when scrolled past — browser saves paint work */
+  .aura-motion-scroll {
+    content-visibility: auto;
+    contain-intrinsic-size: 460vh;
   }
 }
 
