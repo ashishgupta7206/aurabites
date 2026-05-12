@@ -86,10 +86,9 @@ const LoginPage = () => {
             </Link>
 
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <span className="text-3xl">🌸</span>
-              <span className="font-display font-extrabold text-2xl text-primary">Aurabites</span>
-            </div>
+            <Link to="/" className="flex items-center" aria-label="AuraBites home">
+              <img src="/aurabites-logo.jpg" alt="AuraBites" className="h-10 w-auto" />
+            </Link>
 
             {/* Header */}
             <div>

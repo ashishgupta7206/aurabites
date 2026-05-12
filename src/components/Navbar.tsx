@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Menu, User, LogOut, Package } from 'lucide-react';
+import logoUrl from '@/assets/aurabites-logo.jpg';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -46,11 +47,16 @@ export const Navbar = () => {
     >
       <nav className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <span className="text-2xl"></span>
-          <span className={`font-display font-extrabold text-xl md:text-2xl ${isHome && !isScrolled ? 'text-white' : 'text-primary'}`}>
-            Aurabites
-          </span>
+        <Link to="/" className="flex items-center" aria-label="AuraBites home">
+          <img
+            src={logoUrl}
+            alt="AuraBites"
+            className={`h-9 md:h-10 w-auto transition-[filter] duration-200 ${
+              isHome && !isScrolled ? 'invert brightness-200' : ''
+            }`}
+            width="952"
+            height="792"
+          />
         </Link>
 
         {/* Desktop Navigation */}

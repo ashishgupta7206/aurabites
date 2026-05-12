@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import logoUrl from '@/assets/aurabites-logo.jpg';
 import { CONTACT_INFO } from '@/lib/constants';
 
 export const Footer = () => {
@@ -9,9 +10,14 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-2xl">🌸</span>
-              <span className="font-display font-extrabold text-2xl">Aurabites</span>
+            <Link to="/" className="flex items-center" aria-label="AuraBites home">
+              <img
+                src={logoUrl}
+                alt="AuraBites"
+                className="h-10 w-auto invert brightness-200"
+                width="952"
+                height="792"
+              />
             </Link>
             <p className="text-background/70 text-sm leading-relaxed">
               India's favorite healthy snack brand. Premium roasted makhana with authentic flavors and 10g protein per pack.
@@ -106,7 +112,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-background/10 pt-8 text-center">
           <p className="text-sm text-background/50">
-            © {new Date().getFullYear()} Aurabites. All rights reserved. Made with 💛 in India.
+            © {new Date().getFullYear()} AuraBites. All rights reserved. Made in India.
           </p>
         </div>
       </div>
