@@ -29,6 +29,48 @@ import {
 import { KEYRING_STORAGE_KEY, sanitizeKeyringName } from "@/lib/keyring";
 import { useAuth } from "@/contexts/AuthContext";
 
+type RazorpayCheckout = {
+  open: () => void;
+  on: (eventName: string, callback: (response: unknown) => void) => void;
+};
+
+type RazorpayConstructor = new (options: Record<string, unknown>) => RazorpayCheckout;
+
+declare global {
+  interface Window {
+    Razorpay?: RazorpayConstructor;
+  }
+}
+
+let razorpayScriptPromise: Promise<boolean> | null = null;
+
+const loadRazorpayScript = () => {
+  if (typeof window === "undefined") return Promise.resolve(false);
+  if (window.Razorpay) return Promise.resolve(true);
+  if (razorpayScriptPromise) return razorpayScriptPromise;
+
+  razorpayScriptPromise = new Promise((resolve) => {
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+    );
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => resolve(true), { once: true });
+      existingScript.addEventListener("error", () => resolve(false), { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+
+  return razorpayScriptPromise;
+};
+
 type SavedAddress = {
   id: number;
   fullName: string;
@@ -166,12 +208,14 @@ const CheckoutPage = () => {
   };
 
   // ✅ Razorpay Open
-  const openRazorpay = (payment: any, orderId: number) => {
+  const openRazorpay = async (payment: any, orderId: number) => {
     console.log("✅ openRazorpay called");
     console.log("payment object:", payment);
     console.log("orderId:", orderId);
 
-    if (!window?.Razorpay) {
+    const isRazorpayLoaded = await loadRazorpayScript();
+
+    if (!isRazorpayLoaded || !window?.Razorpay) {
       toast({
         title: "Razorpay not loaded",
         description: "Please refresh and try again.",
@@ -277,7 +321,7 @@ const CheckoutPage = () => {
       },
     };
 
-    const rzp = new (window as any).Razorpay(options);
+    const rzp = new window.Razorpay(options);
 
     // ✅ Runs if payment failed
     rzp.on("payment.failed", function (response: any) {
@@ -486,7 +530,7 @@ const CheckoutPage = () => {
       }
 
       // 3) Open Razorpay
-      openRazorpay(data.data, createdOrderId);
+      await openRazorpay(data.data, createdOrderId);
     } catch (err: any) {
       console.error("❌ Payment failed:", err);
       toast({

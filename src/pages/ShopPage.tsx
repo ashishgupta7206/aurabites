@@ -36,7 +36,7 @@ interface ShopProduct {
   productVariantMktStatusSortOrder: number | null;
   sortOrder: number | null;
   productType: string;
-  listOfVariantInCombo: any[];
+  listOfVariantInCombo: unknown[];
   images: { id: number; imageUrl: string; sortOrder: number }[];
 }
 
@@ -140,7 +140,7 @@ const ShopPage = () => {
       name: sp.productVariantName, // Use Variant Name
       price: sp.price,
       originalPrice: sp.mrp,
-      image: sp.images[0]?.imageUrl,
+      image: sp.images[0]?.imageUrl || sp.mainImage,
       flavor: sp.productName,
       flavorColor: sp.color || "#FFF",
       categoryId: String(sp.categoryId),

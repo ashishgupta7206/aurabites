@@ -61,17 +61,17 @@ const CategoriesPage = () => {
 
         if (data.success && data.data) {
           const mappedCategories: Category[] = data.data.map((item, index) => {
-            // Helper to assign consistent styles based on index or content
             const gradients = ['gradient-mint', 'gradient-teal', 'gradient-rust', 'gradient-gold'];
-            const icons = ['🌾', '🌿', '🌰'];
+            const icons = ['grain', 'leaf', 'seed'];
 
             return {
               id: String(item.id),
               name: item.name,
               slug: item.slug,
               description: item.description,
-              icon: icons[index % icons.length], // Rotate icons
-              gradient: gradients[index % gradients.length], // Rotate gradients
+              imageUrl: item.imageUrl,
+              icon: icons[index % icons.length],
+              gradient: gradients[index % gradients.length],
               comingSoon: item.status !== 'ACTIVE',
             };
           });
@@ -88,12 +88,12 @@ const CategoriesPage = () => {
     };
 
     fetchCategories();
-  }, []);
+  }, [API_BASE_URL]);
 
   return (
     <>
       <Helmet>
-        <title>Categories – Aurabites Makhana Snacks</title>
+        <title>Categories - Aurabites Makhana Snacks</title>
         <meta name="description" content="Browse Aurabites makhana categories. Roasted makhana, raw makhana, and premium dry fruits." />
       </Helmet>
 

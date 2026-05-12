@@ -1,9 +1,62 @@
-import type { CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { landingFlavours } from '@/data/landingFlavours';
 
+interface CatalogProductRow {
+  productId: number;
+  productVariantSku: string;
+}
+
 export const ProductGrid = () => {
+  const [productLinks, setProductLinks] = useState<Record<string, string>>({});
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+  const skuLookup = useMemo(() => new Set(landingFlavours.map((flavour) => flavour.sku)), []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProductLinks = async () => {
+      try {
+        const response = await fetch(`${apiBaseUrl}/products/search`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productType: 'JAR',
+            pagination: { page: 0, size: 100 },
+            sorting: [{ orderBy: 'id', order: 'asc' }],
+          }),
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (!data.success || !Array.isArray(data.data)) return;
+
+        const nextLinks = (data.data as CatalogProductRow[]).reduce((links: Record<string, string>, product) => {
+          if (skuLookup.has(product.productVariantSku)) {
+            links[product.productVariantSku] = `/product/${product.productId}`;
+          }
+          return links;
+        }, {});
+
+        if (isMounted) {
+          setProductLinks(nextLinks);
+        }
+      } catch {
+        if (isMounted) {
+          setProductLinks({});
+        }
+      }
+    };
+
+    fetchProductLinks();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [apiBaseUrl, skuLookup]);
+
   return (
     <section id="products" className="ab-section bg-[#0b0b0c] text-[#fff7ea]">
       <div className="container mx-auto px-4">
@@ -47,7 +100,7 @@ export const ProductGrid = () => {
                   {flavour.description}
                 </p>
                 <Link
-                  to={flavour.shopPath}
+                  to={productLinks[flavour.sku] || flavour.shopPath}
                   className="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-bold text-[#160d09] transition group-hover:-translate-y-0.5"
                 >
                   Shop Now

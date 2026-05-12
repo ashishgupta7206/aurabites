@@ -135,11 +135,12 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Image */}
       <Link to={`/product/${product.productId}`}>
-        <div className="relative aspect-[4/3] overflow-hidden">
+        <div className="relative aspect-[4/3] overflow-hidden bg-white/65">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            loading="lazy"
+            className="h-full w-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
           />
           {/* Floating decorations */}
           <div className="absolute bottom-3 right-3 text-xl opacity-40 animate-float-slow">✨</div>

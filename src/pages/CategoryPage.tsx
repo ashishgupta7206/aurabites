@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Wheat } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { CartBar } from '@/components/CartBar';
@@ -39,7 +39,7 @@ interface ShopProduct {
   productVariantMktStatusSortOrder: number | null;
   sortOrder: number | null;
   productType: string;
-  listOfVariantInCombo: any[];
+  listOfVariantInCombo: unknown[];
   images: { id: number; imageUrl: string; sortOrder: number }[];
 }
 
@@ -70,12 +70,22 @@ interface CategoriesApiResponse {
   data: ApiCategory[];
 }
 
+interface CategoryView {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  imageUrl?: string;
+  icon: string;
+  gradient: string;
+}
+
 const CategoryPage = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [categoryProducts, setCategoryProducts] = useState<ShopProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [category, setCategory] = useState<any>(null); // To store merged category data
+  const [category, setCategory] = useState<CategoryView | null>(null);
   const [categoryLoading, setCategoryLoading] = useState<boolean>(true);
   const { toast } = useToast();
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
@@ -102,12 +112,17 @@ const CategoryPage = () => {
             const foundApiCategory = data.data.find(c => String(c.id) === id);
             if (foundApiCategory) {
               const index = Number(foundApiCategory.id) || 0;
+              const gradients = ['gradient-mint', 'gradient-teal', 'gradient-rust', 'gradient-gold'];
+              const icons = ['grain', 'leaf', 'seed'];
 
               setCategory({
                 id: String(foundApiCategory.id),
                 name: foundApiCategory.name,
                 slug: foundApiCategory.slug,
                 description: foundApiCategory.description,
+                imageUrl: foundApiCategory.imageUrl,
+                icon: icons[index % icons.length],
+                gradient: gradients[index % gradients.length],
               });
             }
           }
@@ -231,7 +246,9 @@ const CategoryPage = () => {
               </Link>
 
               <div className="flex items-center gap-4">
-                <span className="text-5xl">{category.icon}</span>
+                <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/70 shadow-sm">
+                  <Wheat className="h-8 w-8 text-primary" aria-hidden="true" />
+                </span>
                 <div>
                   <h1 className="font-display text-3xl md:text-4xl font-extrabold text-foreground">
                     {category.name}

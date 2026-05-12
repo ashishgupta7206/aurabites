@@ -16,6 +16,7 @@ export interface LandingFlavor {
   notes: string;
   kcal: number;
   protein: string;
+  sku: string;
   image: string;
   alt: string;
   shopPath: string;
@@ -34,6 +35,7 @@ export const landingFlavours: LandingFlavor[] = [
     notes: 'Chilli heat, tangy lime, smoked paprika, roasted crunch.',
     kcal: 128,
     protein: '9.2g',
+    sku: 'AB-MAK-JAR-PERI',
     image: jarPeri,
     alt: 'AuraBites Peri-Peri makhana jar',
     shopPath: '/shop',
@@ -50,6 +52,7 @@ export const landingFlavours: LandingFlavor[] = [
     notes: 'Sweet onion, creamy herbs, white pepper, clean finish.',
     kcal: 124,
     protein: '9.0g',
+    sku: 'AB-MAK-JAR-CREAM',
     image: jarCream,
     alt: 'AuraBites Cream and Onion makhana jar',
     shopPath: '/shop',
@@ -66,6 +69,7 @@ export const landingFlavours: LandingFlavor[] = [
     notes: 'Pudina leaf, black salt, amchur, cumin, green chilli.',
     kcal: 118,
     protein: '9.4g',
+    sku: 'AB-MAK-JAR-MINT',
     image: jarPudina,
     alt: 'AuraBites Mint Pudina makhana jar',
     shopPath: '/shop',
@@ -82,6 +86,7 @@ export const landingFlavours: LandingFlavor[] = [
     notes: 'Kashmiri chilli, kasuri methi, garlic, roasted masala.',
     kcal: 132,
     protein: '9.1g',
+    sku: 'AB-MAK-JAR-TANDOORI',
     image: jarTandoori,
     alt: 'AuraBites Tandoori Masala makhana jar',
     shopPath: '/shop',
@@ -98,6 +103,7 @@ export const landingFlavours: LandingFlavor[] = [
     notes: 'Pink Himalayan salt, cracked pepper, light garlic note.',
     kcal: 120,
     protein: '9.3g',
+    sku: 'AB-MAK-JAR-SALT',
     image: jarSalt,
     alt: 'AuraBites Himalayan Salt and Pepper makhana jar',
     shopPath: '/shop',
