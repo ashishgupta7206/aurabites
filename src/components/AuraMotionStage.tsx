@@ -17,20 +17,15 @@ const productCenters = [0.24, 0.4, 0.54, 0.67, 0.77];
 const windowPeak = (value: number, center: number, width: number) =>
   clampMotion(1 - Math.abs(value - center) / width);
 
-// Detect device tier once, before render
+// Detect device tier once, before render.
+// Policy: any mobile-sized viewport (<=768px) gets the static fallback —
+// the scroll-driven animation is desktop-only. Premium e-commerce sites
+// (Apple, Allbirds, Nike) all give phone users a simpler, faster layout.
 const detectTier = (): 'low' | 'mobile' | 'desktop' => {
   if (typeof window === 'undefined') return 'desktop';
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'low';
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
-  if (!isMobile) return 'desktop';
-  // Low-end mobile: <=4GB RAM OR <=4 cores OR Save-Data on
-  // deviceMemory and hardwareConcurrency are widely supported on Chromium phones
-  const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-  const lowMem = typeof nav.deviceMemory === 'number' && nav.deviceMemory <= 4;
-  const lowCpu = typeof nav.hardwareConcurrency === 'number' && nav.hardwareConcurrency <= 4;
-  const saveData = nav.connection?.saveData === true;
-  if (lowMem || lowCpu || saveData) return 'low';
-  return 'mobile';
+  if (window.matchMedia('(max-width: 768px)').matches) return 'low';
+  return 'desktop';
 };
 
 export const AuraMotionStage = () => {
