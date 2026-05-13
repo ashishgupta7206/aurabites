@@ -2,7 +2,6 @@ import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/Navbar';
 import { HeroSection } from '@/components/HeroSection';
 import { AuraMotionStage } from '@/components/AuraMotionStage';
-import { HeroFlavorCarousel } from '@/components/HeroFlavorCarousel';
 import { BenefitsSection } from '@/components/BenefitsSection';
 import { BrandStory } from '@/components/BrandStory';
 import { KeyringClaimSection } from '@/components/KeyringClaimSection';
@@ -25,9 +24,8 @@ const Index = () => {
       <div className="min-h-screen bg-[#0b0b0c]">
         <Navbar />
         <main>
-          <HeroSection />
-          <HeroFlavorCarousel />
           <AuraMotionStage />
+          <HeroSection />
           <BenefitsSection />
           <BrandStory />
           <KeyringClaimSection />

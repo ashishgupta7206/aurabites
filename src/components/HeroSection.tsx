@@ -180,23 +180,23 @@ export const HeroSection = () => {
         ))}
       </div>
 
-      <div className="container relative z-10 mx-auto grid min-h-[calc(100vh-6rem)] items-center gap-10 px-4 py-12 lg:grid-cols-[1fr_minmax(320px,520px)_1fr]">
-        <div className="max-w-xl space-y-6 text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#ffd2a8] backdrop-blur-md">
+      <div className="ab-hero-grid container relative z-10 mx-auto grid min-h-[calc(100vh-6rem)] items-center gap-10 px-4 py-12 lg:grid-cols-[1fr_minmax(320px,520px)_1fr]">
+        <div className="ab-hero-copy max-w-xl space-y-6 text-center lg:text-left">
+          <div className="ab-hero-kicker inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#ffd2a8] backdrop-blur-md">
             <Sparkles className="h-4 w-4" />
             Premium roasted makhana
           </div>
 
-          <div className="space-y-5">
-            <h1 className="font-display text-5xl font-extrabold leading-[0.9] tracking-tight text-balance md:text-7xl xl:text-8xl">
+          <div className="ab-hero-headline space-y-5">
+            <h1 className="ab-hero-title font-display text-5xl font-extrabold leading-[0.9] tracking-tight text-balance md:text-7xl xl:text-8xl">
               Snack Light. Crunch Right.
             </h1>
-            <p className="mx-auto max-w-[21rem] text-base leading-8 text-[#d6c7b4] md:max-w-xl md:text-xl lg:mx-0">
+            <p className="ab-hero-subtitle mx-auto max-w-[21rem] text-base leading-8 text-[#d6c7b4] md:max-w-xl md:text-xl lg:mx-0">
               Premium roasted makhana in bold Indian-inspired flavours.
             </p>
           </div>
 
-          <div className="mx-auto flex w-full max-w-[20rem] flex-col gap-3 sm:flex-row sm:justify-center lg:mx-0 lg:max-w-none lg:justify-start">
+          <div className="ab-hero-main-actions mx-auto flex w-full max-w-[20rem] flex-col gap-3 sm:flex-row sm:justify-center lg:mx-0 lg:max-w-none lg:justify-start">
             <Button
               type="button"
               size="lg"
@@ -282,21 +282,6 @@ export const HeroSection = () => {
             <p className="mt-4 text-sm leading-7 text-[#d6c7b4]">
               {activeFlavor.description}
             </p>
-            <div className="mt-7 grid grid-cols-2 gap-4 border-t border-white/10 pt-5">
-              <div>
-                <p className="font-display text-3xl font-extrabold">{activeFlavor.kcal}</p>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#a99680]">
-                  kcal
-                </p>
-              </div>
-              <div>
-                <p className="font-display text-3xl font-extrabold">{activeFlavor.protein}</p>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#a99680]">
-                  protein
-                </p>
-              </div>
-            </div>
-
             <div className="ab-hero-price-row">
               <div>
                 <p className="ab-hero-price">Rs {activePrice}</p>

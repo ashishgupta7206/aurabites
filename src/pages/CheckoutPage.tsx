@@ -584,7 +584,7 @@ const CheckoutPage = () => {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-3">
-              <img src="/aurabites-logo.jpg" alt="AuraBites" className="h-7 w-auto" />
+              <img src="/aurabites-logo-transparent.png" alt="AuraBites" className="h-7 w-auto" />
               <span className="font-display font-bold text-lg text-primary">
                 Checkout
               </span>

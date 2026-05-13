@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Menu, User, LogOut, Package } from 'lucide-react';
-import logoUrl from '@/assets/aurabites-logo.jpg';
+import logoUrl from '@/assets/aurabites-logo-transparent.png';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -51,11 +51,11 @@ export const Navbar = () => {
           <img
             src={logoUrl}
             alt="AuraBites"
-            className={`h-9 md:h-10 w-auto transition-[filter] duration-200 ${
+            className={`h-8 w-auto transition-[filter] duration-200 md:h-9 ${
               isHome && !isScrolled ? 'invert brightness-200' : ''
             }`}
-            width="952"
-            height="792"
+            width="892"
+            height="239"
           />
         </Link>
 

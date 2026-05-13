@@ -87,7 +87,7 @@ const LoginPage = () => {
 
             {/* Logo */}
             <Link to="/" className="flex items-center" aria-label="AuraBites home">
-              <img src="/aurabites-logo.jpg" alt="AuraBites" className="h-10 w-auto" />
+              <img src="/aurabites-logo-transparent.png" alt="AuraBites" className="h-10 w-auto" />
             </Link>
 
             {/* Header */}

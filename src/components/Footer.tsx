@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Instagram, Mail, Phone, MapPin } from 'lucide-react';
-import logoUrl from '@/assets/aurabites-logo.jpg';
+import logoUrl from '@/assets/aurabites-logo-transparent.png';
 import { CONTACT_INFO } from '@/lib/constants';
 
 export const Footer = () => {
@@ -15,8 +15,8 @@ export const Footer = () => {
                 src={logoUrl}
                 alt="AuraBites"
                 className="h-10 w-auto invert brightness-200"
-                width="952"
-                height="792"
+                width="892"
+                height="239"
               />
             </Link>
             <p className="text-background/70 text-sm leading-relaxed">
