@@ -20,7 +20,6 @@ const AboutPage = () => {
           <section className="gradient-cream py-16 md:py-24">
             <div className="container mx-auto px-4">
               <div className="max-w-3xl mx-auto text-center">
-                <span className="text-5xl mb-6 block">🌸</span>
                 <h1 className="font-display text-3xl md:text-5xl font-extrabold text-foreground">
                   Our Story
                 </h1>

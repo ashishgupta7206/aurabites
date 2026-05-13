@@ -37,9 +37,10 @@ export const AuraMotionStage = () => {
     () => typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches,
     [],
   );
-  const dots = useMemo(() => (isMobile ? motionDots.slice(0, 24) : motionDots), [isMobile]);
-  const accents = useMemo(() => (isMobile ? motionAccents.slice(0, 10) : motionAccents), [isMobile]);
-  const makhana = useMemo(() => (isMobile ? motionMakhana.slice(0, 8) : motionMakhana), [isMobile]);
+  // Mobile: no particles at all — jars only.
+  const dots = useMemo(() => (isMobile ? [] : motionDots), [isMobile]);
+  const accents = useMemo(() => (isMobile ? [] : motionAccents), [isMobile]);
+  const makhana = useMemo(() => (isMobile ? [] : motionMakhana), [isMobile]);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -54,9 +55,18 @@ export const AuraMotionStage = () => {
     let visible = false;
     let lastActiveIdx = -1;
     let lastPhase: 'flavour' | 'full' | null = null;
+    let lastUpdate = 0;
     const startedAt = performance.now();
+    // Mobile throttle: cap updates to 15 fps. RAF still fires at 60fps but
+    // the body short-circuits 3 out of every 4 frames — ~75% less work.
+    const FRAME_MS = isMobile ? 1000 / 15 : 0;
 
     const tick = (now: number) => {
+      if (FRAME_MS > 0 && now - lastUpdate < FRAME_MS) {
+        if (visible) rafId = window.requestAnimationFrame(tick);
+        return;
+      }
+      lastUpdate = now;
       const rect = section.getBoundingClientRect();
       const maxScroll = Math.max(section.offsetHeight - window.innerHeight, 1);
       const t = clampMotion(-rect.top / maxScroll);
@@ -242,10 +252,14 @@ export const AuraMotionStage = () => {
         ref={stageRef}
         className="aura-motion-stage sticky top-0 min-h-screen overflow-hidden text-[#fff7ea]"
       >
-        <div className="aura-motion-glow" aria-hidden="true" />
-        <div className="aura-motion-ribbon aura-motion-ribbon-a" aria-hidden="true" />
-        <div className="aura-motion-ribbon aura-motion-ribbon-b" aria-hidden="true" />
-        <div className="aura-motion-dust" aria-hidden="true" />
+        {!isMobile && (
+          <>
+            <div className="aura-motion-glow" aria-hidden="true" />
+            <div className="aura-motion-ribbon aura-motion-ribbon-a" aria-hidden="true" />
+            <div className="aura-motion-ribbon aura-motion-ribbon-b" aria-hidden="true" />
+            <div className="aura-motion-dust" aria-hidden="true" />
+          </>
+        )}
 
         <div className="aura-motion-copy">
           <p className="ab-kicker">Motion tasting room</p>
@@ -288,7 +302,7 @@ export const AuraMotionStage = () => {
             ))}
           </div>
 
-          <div ref={lidRef} className="aura-motion-lid" />
+          {!isMobile && <div ref={lidRef} className="aura-motion-lid" />}
 
           {makhana.map((ball, i) => (
             <span
@@ -321,7 +335,7 @@ export const AuraMotionStage = () => {
           ))}
         </div>
 
-        <div className="aura-motion-floor" aria-hidden="true" />
+        {!isMobile && <div className="aura-motion-floor" aria-hidden="true" />}
 
         <div className="aura-motion-progress" aria-hidden="true">
           {motionProducts.map((product, index) => (
