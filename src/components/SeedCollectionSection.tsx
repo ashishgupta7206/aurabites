@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import { ArrowRight, ChevronLeft, ChevronRight, FileText, Leaf, PackageCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, FileText, Leaf, PackageCheck, ShoppingCart, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -12,11 +14,48 @@ import {
 } from '@/components/ui/dialog';
 import { seedProducts, type SeedProduct } from '@/data/seedProducts';
 
+interface SeedCatalogImage {
+  imageUrl: string;
+  sortOrder?: number | null;
+}
+
+interface SeedCatalogRow {
+  productId: number;
+  productName?: string;
+  productVariantId: number;
+  productVariantName?: string;
+  productVariantSku: string;
+  price: number;
+  mrp?: number;
+  mainImage?: string;
+  color?: string | null;
+  images?: SeedCatalogImage[];
+}
+
+interface SeedProductMatch {
+  productId: number;
+  productVariantId: number;
+  productName?: string;
+  productVariantName?: string;
+  price: number;
+  mrp?: number;
+  image?: string;
+  color?: string | null;
+}
+
 const seedStats = [
   { label: 'Varieties', value: '8' },
   { label: 'Jar size', value: '500g' },
   { label: 'Preservatives', value: 'Zero' },
 ];
+
+const FALLBACK_SEED_PRICE = 199;
+const FALLBACK_SEED_MRP = 299;
+
+const getProductImage = (product: SeedCatalogRow) => {
+  const sortedImages = [...(product.images ?? [])].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  return sortedImages.find((image) => image.imageUrl)?.imageUrl || product.mainImage;
+};
 
 const LabelPreviewButton = ({
   seed,
@@ -53,7 +92,13 @@ const LabelPreviewButton = ({
 
 export const SeedCollectionSection = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [productMatches, setProductMatches] = useState<Record<string, SeedProductMatch>>({});
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'center', loop: true });
+  const { addToCart, setIsCartOpen } = useCart();
+  const { toast } = useToast();
+
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+  const seedSkuLookup = useMemo(() => new Set(seedProducts.map((seed) => seed.sku)), []);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -72,12 +117,107 @@ export const SeedCollectionSection = () => {
     };
   }, [emblaApi, onSelect]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchSeedProducts = async () => {
+      try {
+        const response = await fetch(`${apiBaseUrl}/products/search`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productType: 'JAR',
+            pagination: { page: 0, size: 200 },
+            sorting: [{ orderBy: 'id', order: 'desc' }],
+          }),
+        });
+
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        const rows: SeedCatalogRow[] = Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.data?.content)
+            ? payload.data.content
+            : [];
+
+        const matches = rows.reduce<Record<string, SeedProductMatch>>((nextMatches, product) => {
+          if (seedSkuLookup.has(product.productVariantSku)) {
+            nextMatches[product.productVariantSku] = {
+              productId: product.productId,
+              productVariantId: product.productVariantId,
+              productName: product.productName,
+              productVariantName: product.productVariantName,
+              price: Number(product.price),
+              mrp: product.mrp ? Number(product.mrp) : undefined,
+              image: getProductImage(product),
+              color: product.color,
+            };
+          }
+
+          return nextMatches;
+        }, {});
+
+        if (isMounted) {
+          setProductMatches(matches);
+        }
+      } catch {
+        if (isMounted) {
+          setProductMatches({});
+        }
+      }
+    };
+
+    fetchSeedProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [apiBaseUrl, seedSkuLookup]);
+
   const activeSeed = seedProducts[selectedIndex] ?? seedProducts[0];
+  const activeProduct = productMatches[activeSeed.sku];
+  const activePrice =
+    typeof activeProduct?.price === 'number' && Number.isFinite(activeProduct.price)
+      ? activeProduct.price
+      : FALLBACK_SEED_PRICE;
+  const activeMrp = activeProduct?.mrp ?? FALLBACK_SEED_MRP;
+  const activeShopPath = activeProduct?.productId ? `/product/${activeProduct.productId}` : activeSeed.shopPath;
   const seedStyle = {
     '--seed-accent': activeSeed.accent,
     '--seed-soft': activeSeed.accentSoft,
     '--seed-deep': activeSeed.accentDeep,
   } as CSSProperties;
+
+  const handleAddSeed = (seed: SeedProduct) => {
+    const product = productMatches[seed.sku];
+    if (!product) {
+      toast({
+        title: 'Seed jar is syncing',
+        description: 'Please try again once the product catalog finishes loading.',
+      });
+      return;
+    }
+
+    const price =
+      typeof product.price === 'number' && Number.isFinite(product.price) ? product.price : FALLBACK_SEED_PRICE;
+
+    addToCart({
+      id: String(product.productVariantId),
+      name: product.productVariantName || `AuraBites ${seed.name} Jar`,
+      flavor: seed.name,
+      price,
+      image: product.image || seed.jarImage,
+      flavorColor: product.color || seed.accent,
+      quantity: 1,
+    });
+
+    toast({
+      title: `${seed.name} added to cart`,
+      description: `Rs ${price} seed jar is ready for checkout.`,
+    });
+    setIsCartOpen(true);
+  };
 
   return (
     <section id="seed-jars" className="ab-seed-section ab-section text-[#fff7ea]" style={seedStyle}>
@@ -181,15 +321,28 @@ export const SeedCollectionSection = () => {
                 <dd>{activeSeed.netWeight}</dd>
               </div>
             </dl>
+            <div className="ab-seed-price-row">
+              <strong>Rs {activePrice}</strong>
+              {activeMrp > activePrice ? <span>MRP Rs {activeMrp}</span> : null}
+            </div>
             <div className="ab-seed-panel-actions">
-              <Button asChild className="ab-seed-primary">
-                <Link to={activeSeed.shopPath}>
-                  Shop Seeds
+              <Button
+                type="button"
+                onClick={() => handleAddSeed(activeSeed)}
+                disabled={!activeProduct}
+                className="ab-seed-primary"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                {activeProduct ? 'Add to Cart' : 'Loading'}
+              </Button>
+              <Button asChild variant="outline" className="ab-seed-secondary">
+                <Link to={activeShopPath}>
+                  Shop Now
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <LabelPreviewButton seed={activeSeed} className="ab-seed-secondary" />
             </div>
+            <LabelPreviewButton seed={activeSeed} className="ab-seed-label-wide" />
           </aside>
         </div>
 
@@ -207,43 +360,63 @@ export const SeedCollectionSection = () => {
         </div>
 
         <div className="ab-seed-grid">
-          {seedProducts.map((seed, index) => (
-            <article
-              key={seed.id}
-              className="ab-seed-card"
-              style={{ '--seed-card-accent': seed.accent, animationDelay: `${index * 70}ms` } as CSSProperties}
-            >
-              <div className="ab-seed-card-media">
-                <img
-                  src={seed.jarImage}
-                  alt={seed.alt}
-                  width="520"
-                  height="820"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div className="ab-seed-card-body">
-                <p className="ab-seed-card-meta">
-                  <Leaf className="h-3.5 w-3.5" />
-                  100% seeds
-                </p>
-                <h4>{seed.name}</h4>
-                <p>{seed.detail}</p>
-                <div className="ab-seed-card-proof">
-                  <span>{seed.protein} protein / 100g</span>
-                  <span>{seed.netWeight} jar</span>
+          {seedProducts.map((seed, index) => {
+            const product = productMatches[seed.sku];
+            const price =
+              typeof product?.price === 'number' && Number.isFinite(product.price)
+                ? product.price
+                : FALLBACK_SEED_PRICE;
+            const mrp = product?.mrp ?? FALLBACK_SEED_MRP;
+            const shopPath = product?.productId ? `/product/${product.productId}` : seed.shopPath;
+
+            return (
+              <article
+                key={seed.id}
+                className="ab-seed-card"
+                style={{ '--seed-card-accent': seed.accent, animationDelay: `${index * 70}ms` } as CSSProperties}
+              >
+                <div className="ab-seed-card-media">
+                  <img
+                    src={seed.jarImage}
+                    alt={seed.alt}
+                    width="520"
+                    height="820"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
-                <div className="ab-seed-card-actions">
-                  <Link to={seed.shopPath}>
-                    <PackageCheck className="h-4 w-4" />
-                    Shop
-                  </Link>
-                  <LabelPreviewButton seed={seed} className="ab-seed-card-label" label="Label" />
+                <div className="ab-seed-card-body">
+                  <p className="ab-seed-card-meta">
+                    <Leaf className="h-3.5 w-3.5" />
+                    100% seeds
+                  </p>
+                  <h4>{seed.name}</h4>
+                  <p>{seed.detail}</p>
+                  <div className="ab-seed-card-proof">
+                    <span>{seed.protein} protein / 100g</span>
+                    <span>{seed.netWeight} jar</span>
+                    <span>Rs {price}{mrp > price ? ` / MRP Rs ${mrp}` : ''}</span>
+                  </div>
+                  <div className="ab-seed-card-actions">
+                    <button
+                      type="button"
+                      onClick={() => handleAddSeed(seed)}
+                      disabled={!product}
+                      className="ab-seed-card-cart"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      {product ? 'Add' : 'Sync'}
+                    </button>
+                    <Link to={shopPath}>
+                      <PackageCheck className="h-4 w-4" />
+                      Shop
+                    </Link>
+                    <LabelPreviewButton seed={seed} className="ab-seed-card-label" label="Label" />
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
