@@ -27,6 +27,7 @@ const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const RefundPolicyPage = lazy(() => import("./pages/RefundPolicyPage"));
 const ShippingPolicyPage = lazy(() => import("./pages/ShippingPolicyPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminConsole = lazy(() => import("./pages/admin/AdminConsole"));
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
                   <Route path="/privacy" element={<PrivacyPolicyPage />} />
                   <Route path="/refund" element={<RefundPolicyPage />} />
                   <Route path="/shipping" element={<ShippingPolicyPage />} />
+                  <Route path="/admin/*" element={<AdminConsole />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
